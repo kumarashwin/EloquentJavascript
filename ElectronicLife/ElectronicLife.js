@@ -135,6 +135,47 @@ Wallflower.prototype.act = function(view){
 
 // ------------------
 
+// --- Plant ---
+function Plant(){
+    this.energy = 3 + (Math.random() * 4);
+}
+
+Plant.prototype.act = function(view){
+    if(this.energy > 15){
+        var space = view.find(" ");
+        if(space){
+            return {type: "reproduce", direction: space};
+        }
+    }
+    if(this.energy < 20){
+        return {type: "grow"};
+    }
+};
+// -------------
+
+// --- PlantEater ----
+function PlantEater(){
+    this.energy = 20;
+}
+
+PlantEater.prototype.act = function(view){
+    var space = view.find(" ");
+
+    if (this.energy > 60 && space){
+        return {type: "reproduce", direction: space};
+    }
+
+    var plant = view.find("*");
+    if(plant){
+        return {type:"eat", direction: plant};
+    }
+
+    if(space){
+        return {type:"move", direction: space};
+    }
+};
+// ------------------
+
 //----- Elements/Characters ----
 function elementFromCharacter(legend, character){
     if (character == " "){
@@ -346,32 +387,35 @@ function Wall(){}
 // ---- Legend -----
 var legend = {
     "#": Wall,
-    "o": BouncingCritter
+    "O": PlantEater,
+    "*": Plant
 };
 // -----------------
 
 // ----- Seed (Map) -----
-var seed = ["############################",
-            "#      #    #      o      ##",
-            "#                          #",
-            "#          #####           #",
-            "##         #   #    ##     #",
-            "###           ##     #     #",
-            "#           ###      #     #",
-            "#   ####                   #",
-            "#   ##       o             #",
-            "# o  #         o       ### #",
-            "#    #                     #",
-            "############################"];
+var seed = [
+    "############################",
+    "#####                 ######",
+    "##   ***                **##",
+    "#   *##**         **  O  *##",
+    "#    ***     O    ##**    *#",
+    "#       O         ##***    #",
+    "#                 ##**     #",
+    "#   O       #*             #",
+    "#*          #**       O    #",
+    "#***        ##**    O    **#",
+    "##****     ###***       *###",
+    "############################"];
 // -------------------
 
 //==== MAIN ====
 
-var world = new World(seed, legend);
-console.log(world.toString());
-for(var i = 0; i < 5; i++){
+var world = new LifeLikeWorld(seed, legend);
+
+
+for(var i = 0; i < 5; i++){ 
+    console.log(world.toString());
     world.turn();
-    console.log(world.toString());    
-}
+};
 
 //==== END ====

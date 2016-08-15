@@ -67,6 +67,11 @@ var directions = {
 };
 
 var directionNames = "n ne e se s sw w nw".split(" ");
+
+function directionPlus(direction, degrees){
+    var index = directionNames.indexOf(direction);
+    return directionNames[index + degrees + 8] % 8;
+}
 //-----------------------
 
 // ---- Random ----
@@ -89,8 +94,46 @@ BouncingCritter.prototype.act = function(view){
         direction: this.direction
     };
 }
-
 //----------------------------
+
+// --- Wallflower ---
+function Wallflower(){
+    this.direction = "s";
+}
+
+Wallflower.prototype.act = function(view){
+    var bottomLeft = directionPlus(this.direction, -3);
+    var left = directionPlus(this.direction, -2);
+
+    //Checks to see if bottom left had a wall or something
+    //If yes, sets the direction from where to start checking
+    // i.e. left of the creature
+    if(view.look(bottomLeft) != " "){
+        this.direction = left;
+    }
+
+    //If direction wasn't set to 'left' of the creature,
+    //checks if the space right in front of the creature
+    //is empty. If yes, it moves the creature forward.
+    //Otherwise, it checks each direction, starting from
+    //the left, going clockwise until an empty spot is
+    //found.
+    //If it finds no empty spot before reaching the original
+    //direction, it breaks the loop and goes in the same
+    //original direction. 
+    var startDirection = this.direction;
+    while(view.look(this.direction) != " ") {
+        this.direction = directionPlus(this.direction, 1);
+        
+        if(this.direction == startDirection){
+            break;
+        }
+    }
+
+    return {type: "move", direction: this.direction};
+}
+
+// ------------------
 
 //----- Elements/Characters ----
 function elementFromCharacter(legend, character){
@@ -180,6 +223,86 @@ World.prototype.checkDestination = function(action, currentPositionVector){
     }
 }
 // ----------------------
+
+// --- LifeLikeWorld ---
+function LifeLikeWorld(map, legend){
+    World.call(this, map, legend);
+}
+
+LifeLikeWorld.prototype = Object.create(World.prototype);
+
+
+
+LifeLikeWorld.prototype.letAct = function(critter, currentPositionVector){
+    var action = critter.act(new View(this, currentPositionVector));
+
+    var handled = action && action.type in actionTypes && actionTypes[action.type].call(this, critter, currentPositionVector, action);
+
+    if(!handled){
+        critter.energy -= 0.2;
+        if(critter.energy <= 0){
+            this.grid.set(currentPositionVector, null);
+        }
+    }
+};
+// ---------------------
+
+// --- actionTypes ----
+var actionTypes = Object.create(null);
+
+actionTypes.grow = function(critter){
+    critter.energy += 0.5;
+    return true;
+};
+
+actionTypes.move = function(critter, currentPositionVector, action){
+    var destinationVector = this.checkDestination(action, currentPositionVector);
+
+    if(destinationVector &&
+        this.grid.get(destinationVector) == null &&
+        critter.energy > 1){
+            critter.energy -= 1;
+            this.grid.set(currentPositionVector, null);
+            this.grid.set(destinationVector, critter);
+            return true;
+        }
+    else{
+        return false;
+    }
+};
+
+actionTypes.eat = function(critter, currentPositionVector, action){
+    var destinationVector = this.checkDestination(action, currentPositionVector);
+    
+    if(destinationVector){
+        var targetCritter = this.grid.get(destinationVector);
+    }
+    
+    if(targetCritter && targetCritter.energy != null){
+        critter.energy += targetCritter.energy;
+        this.grid.set(destinationVector, null);
+        return true;
+    }
+
+    return false;
+};
+
+actionTypes.reproduce = function(critter, currentPositionVector, action){
+    var destinationVector = this.checkDestination(action, currentPositionVector);
+    var baby = elementFromCharacter(this.legend, critter.originalCharacter);
+
+    if(destinationVector &&
+        this.grid.get(destinationVector) == null &&
+        critter.energy > 2 * baby.energy){
+            critter.energy -= 2 * baby.energy;    
+            this.grid.set(destinationVector, baby);
+            return true;
+    }
+    else{
+        return false;
+    }
+};
+// --------------------
 
 // ---- View -----
 

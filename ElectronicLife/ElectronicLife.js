@@ -159,8 +159,8 @@ function PlantEater(){
 }
 
 PlantEater.prototype.act = function(view){
+    
     var space = view.find(" ");
-
     if (this.energy > 60 && space){
         return {type: "reproduce", direction: space};
     }
@@ -175,6 +175,48 @@ PlantEater.prototype.act = function(view){
     }
 };
 // ------------------
+
+// --- SmartPlantEater ---
+function SmartPlantEater(){
+    PlantEater.call(this);
+}
+
+SmartPlantEater.prototype = Object.create(PlantEater.prototype);
+
+SmartPlantEater.prototype.justAte = {ate: false, direction: null};
+
+SmartPlantEater.prototype.act = function(view){
+    
+    //Reproduces slower than PlantEater
+    var space = view.find(" ");
+    if (this.energy > 90 && space){
+        return {type: "reproduce", direction: space};
+    }
+
+    //The 'plantsNearby' check makes sure that no creature eats
+    //the last plant if it's the only one remaining.
+    var plant = view.find("*");
+    var plantsNearby = view.findAll("*").length > 1;
+    if(plant && plantsNearby){
+        this.justAte.ate = true;
+        this.justAte.direction = plant;
+        return {type:"eat", direction: plant};
+    }
+
+    //After eating and not finding another plant nearby, 
+    //next move is always to occupy the spot
+    //where the plant was previously, thereby increasing it's
+    //chances at finding more plants
+    if(this.justAte.ate){
+        this.justAte.ate = false;
+        return {type:"move", direction: this.justAte.direction};
+    }
+
+    if(space){
+        return {type:"move", direction: space};
+    }
+};
+// -----------------------
 
 //----- Elements/Characters ----
 function elementFromCharacter(legend, character){
@@ -387,33 +429,25 @@ function Wall(){}
 // ---- Legend -----
 var legend = {
     "#": Wall,
-    "O": PlantEater,
+    "O": SmartPlantEater,
     "*": Plant
 };
 // -----------------
 
 // ----- Seed (Map) -----
 var seed = [
-    "############################",
-    "#####                 ######",
-    "##   ***                **##",
-    "#   *##**         **  O  *##",
-    "#    ***     O    ##**    *#",
-    "#       O         ##***    #",
-    "#                 ##**     #",
-    "#   O       #*             #",
-    "#*          #**       O    #",
-    "#***        ##**    O    **#",
-    "##****     ###***       *###",
-    "############################"];
+    "##########",
+    "##########",
+    "#O ***** #",
+    "#  ***** #",
+    "##########"];
 // -------------------
 
 //==== MAIN ====
 
 var world = new LifeLikeWorld(seed, legend);
 
-
-for(var i = 0; i < 5; i++){ 
+for(var i = 0; i < 25; i++){ 
     console.log(world.toString());
     world.turn();
 };

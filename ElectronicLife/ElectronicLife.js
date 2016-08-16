@@ -220,13 +220,13 @@ SmartPlantEater.prototype.act = function(view){
 
 // --- Tiger ---
 function Tiger(){
-    this.energy = 120;
+    this.energy = 170;
 }
 
 Tiger.prototype.act = function(view){
     
     var space = view.find(" ");
-    if (this.energy > 600 && space){
+    if (this.energy > 620 && space){
         return {type: "reproduce", direction: space};
     }
 

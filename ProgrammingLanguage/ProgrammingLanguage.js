@@ -57,6 +57,14 @@ function parseApply(expression, program){
             }
         }
 
+        //The following line will execute after the ')' is hit
+        //The entire expression has been rolled into 'expression'
+        //and the 'program.slice(1)' exists to check if, beyond
+        //the ')', there lies more '(something)' to compute
+        //Otherwise, the call to parseApply with the program
+        //argument as "" i.e. ")".slice(1) results in a final object of
+        //  {expression: ..., rest: ""}
+        //being evaluated by the 'parse' function, below.
         return parseApply(expression, program.slice(1));
     }
     else{
@@ -65,6 +73,7 @@ function parseApply(expression, program){
     }
 }
 
+//Will make sure that the 'rest' property is "", as explained above
 function parse(program){
     var result = parseExpression(program);
     if(skipSpace(result.rest).length > 0){

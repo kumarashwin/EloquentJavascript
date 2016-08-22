@@ -82,8 +82,105 @@ function parse(program){
     return result.expression;
 }
 
+function evaluate(expression, environment){
+    switch(expression.type){
+        case "value":
+            return expression.value;
+        case "word":
+            if(expression.name in environment){
+                return environment[expression.name];
+            }
+            else{
+                throw new ReferenceError("Undefined variable: " + expression.name);
+            }
+        case "apply":
+            var operator = expression.operator;
+
+            //For things like if, else...
+            if(operator.type == "word" && operator.name in specialForms){
+                return specialForms[operator.name](expression.args, environment);
+            }
+
+            //for normal calls...
+            var op = evaluate(operator, environment)
+            if(typeof op != "function"){
+                throw new TypeError("Applying a non-function.")
+            }
+
+            //applies function op to every argument in the expression, but first makes sure that
+            //all those arguments have been recursively dealt with
+            return op.apply(null, expression.args.map(function(arg){return evaluate(arg, environment)}));
+    }
+}
+
+var specialForms = Object.create(null);
+specialForms["if"] = function(args, env){
+    if(args.length != 3){
+        throw new SyntaxError("Bad number of args to if");
+    }
+    if (evaluate(args[0], env) !== false){
+        return evaluate(args[1], env);
+    }
+    else{
+        return evaluate(args[2], env);
+    }
+};
+
+specialForms["while"] = function(args, env){
+    if(args.length != 2){
+        throw new SyntaxError("Bad number of args to while");
+    }
+
+    while(evaluate(args[0], env) !== false){
+        evaluate(args[1], env);
+    }
+
+    return false;
+}
+
+specialForms["do"] = function(args, env){
+    var value = false;
+    args.forEach(function(arg){
+        value = evaluate(arg, env);
+    });
+    return value;
+}
+
+specialForms["define"] = function(args, env){
+    if(args.length != 2 || args[0].type != "word"){
+        throw new SyntaxError("Bad use of define");
+    }
+    var value = evaluate(args[1], env);
+    env[args[0].name] = value;
+    return value;
+}
+
+var topEnv = Object.create(null);
+topEnv["true"] = true;
+topEnv["false"] = false;
+
+//dynamically creates functions
+["+","-","*","/","==","<",">"].forEach(function(operator){
+    topEnv[operator] = new Function("a, b", "return a " + operator + " b;");
+});
+
+topEnv["print"] = function(value){
+    console.log(value);
+    return value;
+};
+
+function run(){
+    var env = Object.create(topEnv);
+    var program = Array.prototype.slice.call(arguments, 0).join("\n");
+    return evaluate(parse(program), env);
+}
 //=== MAIN ===
 
-console.log(parse("+(a, 10)"));
+run("do(define(total, 0),",
+    "   define(count, 1),",
+    "   while(<(count, 11),",
+    "       do(define(total, +(total,count)),",
+    "          define(count, +(count,1)))),",
+    "   print(total))");
 
 //============

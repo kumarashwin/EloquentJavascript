@@ -155,6 +155,39 @@ specialForms["define"] = function(args, env){
     return value;
 }
 
+specialForms["fun"] = function(args, env){
+    if(!args.length){
+        throw new SyntaxError("Functions need a body");
+    }
+
+    function name(expression){
+        if(expression.type != "word"){
+            throw new SyntaxError("Argument names must be words");
+        }
+        return expression.name;
+    }
+
+    //'slices' the 'arguments' provided to the 'fun' and confirms
+    //that they are words
+    var argumentNames = args.slice(0, args.length - 1).map(name)
+    var body = args[args.length - 1];
+
+    return function(){
+        //Don't get confused: the following line is for when
+        //the function is being called, not when it's being
+        //defined, like the check above
+        if(arguments.length != argumentNames.length){
+            throw new TypeError("Wrong number of arguments");
+        }
+        var localEnv = Object.create(env);
+        for(var i = 0; i < arguments.length; i++){
+            localEnv[argumentNames[i]] = arguments[i];
+        }
+
+        return evaluate(body, localEnv);
+    }
+}
+
 var topEnv = Object.create(null);
 topEnv["true"] = true;
 topEnv["false"] = false;
@@ -182,5 +215,10 @@ run("do(define(total, 0),",
     "       do(define(total, +(total,count)),",
     "          define(count, +(count,1)))),",
     "   print(total))");
+
+run(
+    "do(define(plusOne,fun(a,+(a,1))),",
+    "   print(plusOne(10)))"
+    );
 
 //============

@@ -153,6 +153,31 @@ specialForms["define"] = function(args, env){
     return value;
 }
 
+specialForms["set"] = function(args, env) {
+    if(args.length != 2 || args[0].type != "word"){
+        throw new SyntaxError("Bad use of set");
+    }
+
+    var value = evaluate(args[1], env);
+
+    var name = args[0].name;
+    
+    if(!Object.prototype.hasOwnProperty.call(env, name)){
+        var parentEnv = Object.getPrototypeOf(env);
+        if(!Object.prototype.hasOwnProperty.call(parentEnv, name)){
+            throw new ReferenceError();
+        } 
+        else{
+            parentEnv[name] = value;
+        }
+    }
+    else{
+        env[name] = value;
+    }
+    
+    return value;
+}
+
 specialForms["fun"] = function(args, env){
     if(!args.length){
         throw new SyntaxError("Functions need a body");
@@ -233,39 +258,60 @@ function run(){
 }
 //=== MAIN ===
 
-run("do(define(total, 0),",
-    "   define(count, 1),",
-    "   while(<(count, 11),",
-    "       do(define(total, +(total,count)),",
-    "          define(count, +(count,1)))),",
-    "   print(total))");
+// run("do(define(total, 0),",
+//     "   define(count, 1),",
+//     "   while(<(count, 11),",
+//     "       do(define(total, +(total,count)),",
+//     "          define(count, +(count,1)))),",
+//     "   print(total))");
 
-run(
-    "do(define(plusOne,fun(a,+(a,1))),",
-    "   print(plusOne(10)))"
-    );
+// run(
+//     "do(define(plusOne,fun(a,+(a,1))),",
+//     "   print(plusOne(10)))"
+//     );
+
+// run(
+//     "do(",
+//     "   define(pow,",
+//     "          fun(base, exp,",
+//     "              if(==(exp,0),",
+//     "                   1,",
+//     "                   *(base, pow(base, -(exp, 1)))",
+//     "              )",
+//     "          )",
+//     "   ),",
+//     "   print(pow(2, 10))",
+//     ")"
+// );
+
+// run("do(define(sum, fun(array,",
+//     "     do(define(i, 0),",
+//     "        define(sum, 0),",
+//     "        while(<(i, length(array)),",
+//     "          do(define(sum, +(sum, element(array, i))),",
+//     "             define(i, +(i, 1)))),",
+//     "        sum))),",
+//     "   print(sum(array(1, 2, 3))))");
+// → 6
 
 run(
     "do(",
-    "   define(pow,",
-    "          fun(base, exp,",
-    "              if(==(exp,0),",
-    "                   1,",
-    "                   *(base, pow(base, -(exp, 1)))",
-    "              )",
-    "          )",
-    "   ),",
-    "   print(pow(2, 10))",
+    "   define(x, 10),",
+    "   define(func, fun(val, set(x, val))),",
+    "   func(5),",
+    "   print(x)", 
     ")"
 );
+//5
 
-run("do(define(sum, fun(array,",
-    "     do(define(i, 0),",
-    "        define(sum, 0),",
-    "        while(<(i, length(array)),",
-    "          do(define(sum, +(sum, element(array, i))),",
-    "             define(i, +(i, 1)))),",
-    "        sum))),",
-    "   print(sum(array(1, 2, 3))))");
-// → 6
+run(
+    "do(",
+    "   define(x, 10),",
+    "   define(func, fun(val, fun(toAddBy, set(x, +(val, toAddBy))))),",
+    "   func(5)(3),",
+    "   print(x)", 
+    ")"
+);
+//ReferenceError
+
 //============

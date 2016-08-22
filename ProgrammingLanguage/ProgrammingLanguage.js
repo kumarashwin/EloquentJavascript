@@ -1,9 +1,7 @@
 //Takes cares of removing the spaces from the start of an expression
 //if a user has just added a bunch of them for whatever reason
 function skipSpace(string) {
-  var first = string.search(/\S/);
-  if (first == -1) return "";
-  return string.slice(first);
+  return string.replace(/(#.*\n|\s)/g, "");
 }
 
 function parseExpression(program){
@@ -202,6 +200,32 @@ topEnv["print"] = function(value){
     return value;
 };
 
+topEnv["array"] = function(){
+    var length = arguments.length; 
+    if(!length){
+        throw new SyntaxError("Cannot have empty array");
+    }
+    var array = [];
+    for(var i = 0; i < length; i++){
+        array[i] = arguments[i];
+    }
+    return array;
+};
+
+topEnv["length"] = function(array){
+    return array.length;
+};
+
+topEnv["element"] = function(array, n){
+    if(n < 0){
+        throw new SyntaxError("Index number cannot be less than 0")
+    }
+    if(n >= array.length){
+        throw new SyntaxError("Index number higher than number of elements in array")
+    }
+    return array[n];
+}
+
 function run(){
     var env = Object.create(topEnv);
     var program = Array.prototype.slice.call(arguments, 0).join("\n");
@@ -221,4 +245,27 @@ run(
     "   print(plusOne(10)))"
     );
 
+run(
+    "do(",
+    "   define(pow,",
+    "          fun(base, exp,",
+    "              if(==(exp,0),",
+    "                   1,",
+    "                   *(base, pow(base, -(exp, 1)))",
+    "              )",
+    "          )",
+    "   ),",
+    "   print(pow(2, 10))",
+    ")"
+);
+
+run("do(define(sum, fun(array,",
+    "     do(define(i, 0),",
+    "        define(sum, 0),",
+    "        while(<(i, length(array)),",
+    "          do(define(sum, +(sum, element(array, i))),",
+    "             define(i, +(i, 1)))),",
+    "        sum))),",
+    "   print(sum(array(1, 2, 3))))");
+// → 6
 //============

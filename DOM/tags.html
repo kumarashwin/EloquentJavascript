@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+    <body>
+        <h1>Heading with a <span>span</span> element.</h1>
+        <p>A paragraph with <span>one</span>, <span>two</span> spans.</p>
+    </body>
+    <script type="text/javascript">
+        function byTagName(node, tagName) {
+            var array = [];
+
+            if (node.nodeName && node.nodeName.toLowerCase() == tagName){
+                array = array.concat(node);
+            }
+
+            var children = node.childNodes;
+            if(children && children.length){
+                for(var child in children){
+                    if(children.hasOwnProperty(child)){
+                        array = array.concat(byTagName(children[child], tagName));
+                    }
+                }
+            }
+
+            return array;
+        }
+
+        console.log(byTagName(document.body, "h1").length);
+        // → 1
+        console.log(byTagName(document.body, "span").length);
+        // → 3
+        var para = document.querySelector("p");
+        console.log(byTagName(para, "span").length);
+        // → 2
+    </script>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <style>
+            /* Defines a cleaner look for tables */
+            table {border-collapse: collapse;}
+            td,
+            th {border: 1px solid black; padding: 3px 8px;}
+            th {text-align: left;}
+        </style>
+    </head>
+    <body>
+        <p>Hey!</p>
+    </body>
+    <script type="text/javascript">
+
+            var MOUNTAINS = [
+                {name:	"Kilimanjaro", height:	5895, country:	"Tanzania"},
+                {name:	"Everest", height:	8848, country:	"Nepal"},
+                {name:	"Mount Fuji", height:	3776, country:	"Japan"},
+                {name:	"Mont Blanc", height:	4808, country:	"Italy/France"},
+                {name:	"Vaalserberg", height:	323, country:	"Netherlands"},
+                {name:	"Denali", height:	6168, country:	"United States"},
+                {name:	"Popocatepetl", height:	5465, country:	"Mexico"}
+                ];
+
+            function buildTable(data) {
+                // Your code here.
+                var node = document.createElement("table");
+                
+                var headerRow = document.createElement("tr");
+                var colNames = Object.keys(data[0]);
+                colNames.forEach(function(colName){
+                    var header = document.createElement("th");
+                    header.appendChild(document.createTextNode(colName));
+                    headerRow.appendChild(header);
+                });
+                node.appendChild(headerRow);
+                
+                for(var index in data){
+                    var rows = document.createElement("tr");
+                    var row = data[index];
+                    var properties = Object.getOwnPropertyNames(row);
+
+                    properties.forEach(function(property){
+                        var text = document.createTextNode(row[property]);
+                        var cell = document.createElement("td");
+                        cell.appendChild(text);
+                        rows.appendChild(cell);
+                    });
+                    node.appendChild(rows);
+                }
+                
+                return node;
+            }
+
+    // === MAIN ===
+    //console.log(buildTable(MOUNTAINS));
+    document.body.appendChild(buildTable(MOUNTAINS));
+    </script>
+</html>

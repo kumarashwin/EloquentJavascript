@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <div data-tabname="one">Tab one</div>
+            <div data-tabname="two">Tab two</div>
+            <div data-tabname="three">Tab three</div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        function asTabs(node) {
+            var tabs = document.querySelectorAll("[data-tabname]");
+
+            var buttons = [];
+            for(var i = tabs.length - 1; i >= 0; i--){
+                tabs[i].style.display = "none";
+
+                var button = document.createElement("button");
+                button.appendChild(document.createTextNode(tabs[i].getAttribute("data-tabname")));
+                button.value = button.innerText;
+
+                node.insertBefore(button, node.firstChild);
+                buttons.unshift(button);
+            }
+
+            node.addEventListener("click", function(event){
+                var thisTab;
+                if(event.target.nodeName = "BUTTON"){
+                    for(var i = 0; i < tabs.length; i++){
+                        tabs[i].style.display = "none";
+                        if(tabs[i].getAttribute("data-tabname") == event.target.value){
+                            thisTab = tabs[i];
+                        }
+                    }
+                    thisTab.style.display = "block";
+                }        
+            });
+        }
+        asTabs(document.querySelector("#wrapper"));
+    </script>
+</html>

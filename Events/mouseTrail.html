@@ -10,13 +10,12 @@
                 position: absolute;
                 height: 6px;
                 width: 6px;
-                border-radius: 3px;
+                border-radius: 100px;
                 background: teal;
             }
             
             body {
                 height: 300px;
-                border: 1px solid black;
             }
         </style>
     </head>
@@ -27,12 +26,25 @@
     <script type="text/javascript">
         var trail = [];
         var body = document.querySelector("body");
-        
-        for(var i = 0; i < 6; i++){
+
+        var size = 50
+        var minSize = Math.ceil(size/10);
+        var opacity = 1;
+        var opacityUnit = opacity/size;
+
+        for(var i = 0; i < size; i++){
             var dot = document.createElement("div");
             dot.className = "trail";
-            dot.style.left = "2px";
-            dot.style.top = "2px";
+
+            var currentSize = Math.max(minSize, size - i) + "px";
+            dot.style.width = dot.style.height = currentSize;
+            dot.style.borderRadius = size + "px";
+
+            dot.style.opacity = opacity;
+            opacity -= opacityUnit;
+            
+            dot.style.left = "0";
+            dot.style.top = "0";
             body.appendChild(dot);
             trail.push(dot);
         }
@@ -57,10 +69,10 @@
             }
             
             current = trail[0].style; 
-            current.left = calculateHalfOfDifference(current.left, lastMousePositionX);
-            current.top = calculateHalfOfDifference(current.top, lastMousePositionY);
+            current.left = calculateHalfOfDifference(current.left, lastMousePositionX - size/2);
+            current.top = calculateHalfOfDifference(current.top, lastMousePositionY - size/2);
 
-         }, 50);
+         }, 3);
 
         function calculateHalfOfDifference(current, next){
             current = parseInt(current);

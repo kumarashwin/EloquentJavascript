@@ -31,42 +31,55 @@
         for(var i = 0; i < 6; i++){
             var dot = document.createElement("div");
             dot.className = "trail";
+            dot.style.left = "2px";
+            dot.style.top = "2px";
             body.appendChild(dot);
             trail.push(dot);
         }
 
-        //var trail_1 = document.createElement("div");
-        //var trail_2 = document.createElement("div");
-
-        //trail_1.className = "trail";
-        //trail_2.className = "trail";
-
-        //document.querySelector("body").appendChild(trail_1);
-        //document.querySelector("body").appendChild(trail_2);
-
         var lastMousePositionX;
         var lastMousePositionY;
 
-        // addEventListener("mousemove", function(event){
-        //     trail_2.style.left = trail_1.style.left;
-        //     trail_2.style.top = trail_1.style.top;
-        //     trail_1.style.left = (lastMousePositionX) + "px";
-        //     trail_1.style.top = (lastMousePositionY) + "px";
-        //     lastMousePositionX = event.pageX;
-        //     lastMousePositionY = event.pageY;
-        // })
-
         addEventListener("mousemove", function(event){
-            for(var i = trail.length - 1; i > 0; i--){
-                trail[i].style.left = trail[i - 1].style.left;
-                trail[i].style.top = trail[i - 1].style.top;
-            }
-            trail[0].style.left = (lastMousePositionX) + "px";
-            trail[0].style.top = (lastMousePositionY) + "px";
-
             lastMousePositionX = event.pageX;
-            lastMousePositionY = event.pageY; 
-        });        
+            lastMousePositionY = event.pageY;
+        });
+
+        setInterval(function(){
+            var current, next;
+            for(var i = trail.length - 1; i > 0; i--){
+                
+                current = trail[i].style;
+                next = trail[i - 1].style;
+                
+                current.left = calculateHalfOfDifference(current.left, next.left);
+                current.top = calculateHalfOfDifference(current.top, next.top);
+            }
+            
+            current = trail[0].style; 
+            current.left = calculateHalfOfDifference(current.left, lastMousePositionX);
+            current.top = calculateHalfOfDifference(current.top, lastMousePositionY);
+
+         }, 50);
+
+        function calculateHalfOfDifference(current, next){
+            current = parseInt(current);
+            next = parseInt(next);
+            var difference = next - current;
+            var toChangeBy;
+
+            if(difference){
+                if(difference < 0){
+                    toChangeBy = Math.min(-1, Math.floor(difference / 2));
+                }
+                else {
+                    toChangeBy = Math.max( 1, Math.ceil(difference / 2));
+                }
+                return current + toChangeBy + "px";
+            }
+            return current;
+        }
+
     </script>
 
 </html>

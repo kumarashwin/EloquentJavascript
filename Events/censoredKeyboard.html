@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+   <head>
+       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   </head>
+    <body>
+
+    <form action="">
+        <input type="text">
+    </form>
+
+    </body>
+    <script type="text/javascript">
+        var field = document.querySelector("input");
+
+        field.addEventListener("keydown", function(event){
+            if(!/[^QqWwKk]/.test(event.key))
+            {
+                event.preventDefault();
+                console.log("Warning!");
+                console.log(event.key);
+            }
+        })
+    </script>
+</html>

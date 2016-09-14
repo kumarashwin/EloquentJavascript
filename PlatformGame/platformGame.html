@@ -3,9 +3,26 @@
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <link rel="stylesheet" href="platformGame.css">
     </head>
     <body>
 
     </body>
     <script type="text/javascript" src="platformGame.js"></script>
+    <script>
+        var simpleLevelPlan = [
+            "                      ",
+            "                      ",
+            "  x              = x  ",
+            "  x         o o    x  ",
+            "  x @      xxxxx   x  ",
+            "  xxxxx            x  ",
+            "      x!!!!!!!!!!!!x  ",
+            "      xxxxxxxxxxxxxx  ",
+            "                      "
+        ];
+
+        var simpleLevel = new Level(simpleLevelPlan);
+        var display = new DOMDisplay(document.body, simpleLevel);
+    </script>
 </html>

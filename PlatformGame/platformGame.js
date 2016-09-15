@@ -89,16 +89,18 @@ Level.prototype.actorAt = function(actor){
 var maxStep = 0.05;
 
 Level.prototype.animate = function(step, keys){
-    if(this.status != null){
-        this.finishDelay -= step;
-    }
+    if(paused == false){
+        if(this.status != null){
+            this.finishDelay -= step;
+        }
 
-    while(step > 0){
-        var thisStep = Math.min(step, maxStep);
-        this.actors.forEach(function(actor){
-            actor.act(thisStep, this, keys);
-        }, this);
-        step -= thisStep;
+        while(step > 0){
+            var thisStep = Math.min(step, maxStep);
+            this.actors.forEach(function(actor){
+                actor.act(thisStep, this, keys);
+            }, this);
+            step -= thisStep;
+        }
     }
 };
 
@@ -359,7 +361,10 @@ DOMDisplay.prototype.clear = function(){
 //KEYS
 var arrowCodes = {37: "left",
                   38: "up",
-                  39: "right"};
+                  39: "right",
+                  27: "pause"};
+
+var paused = false;
 
 var arrows = trackKeys(arrowCodes);
 
@@ -367,7 +372,25 @@ function trackKeys(codes){
     var pressed = Object.create(null);
     function handler(event){
         if(codes.hasOwnProperty(event.keyCode)){
-            var down = event.type == "keydown";
+
+            var down;
+            if(event.type == "keydown"){
+                down = true;
+                //Escape pressed:
+                if(event.keyCode == 27){
+                    //Switch from true to false and vice-versa
+                    paused = (paused == true) ? false : true;
+                    down = paused;
+                }
+            }
+            else{
+                down = false;
+                //keyup doesn't change paused state with Escape
+                if(event.keyCode == 27){
+                    down = paused;
+                }
+                
+            }
             pressed[codes[event.keyCode]] = down;
             event.preventDefault();
         }

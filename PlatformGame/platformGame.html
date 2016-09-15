@@ -21,8 +21,7 @@
             "      xxxxxxxxxxxxxx  ",
             "                      "
         ];
-
-        var simpleLevel = new Level(simpleLevelPlan);
-        var display = new DOMDisplay(document.body, simpleLevel);
+        var GAME_LEVELS = [simpleLevelPlan];
+        runGame(GAME_LEVELS, DOMDisplay);
     </script>
 </html>

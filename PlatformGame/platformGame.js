@@ -103,7 +103,7 @@ Level.prototype.animate = function(step, keys){
 };
 
 Level.prototype.playerTouched = function(type, actor){
-    if(type = "lava" && this.status == null){
+    if(type == "lava" && this.status == null){
         this.status = "lost";
         this.finishDelay = 1;
     } else if(type == "coin"){
@@ -207,7 +207,7 @@ Player.prototype.act = function(step, level, keys){
     }
 
     //Losing Animation
-    if(level.status = "lost"){
+    if(level.status == "lost"){
         this.pos.y += step;
         this.size.y -= step;
     }
@@ -258,7 +258,7 @@ function Coin(pos){
 Coin.prototype.type = "coin";
 
 var wobbleSpeed = 8;
-var wobbleDistance = 0.07;
+var wobbleDist = 0.07;
 
 Coin.prototype.act = function(step){
     this.wobble += step * wobbleSpeed;
@@ -355,3 +355,77 @@ DOMDisplay.prototype.scrollPlayerIntoView = function(){
 DOMDisplay.prototype.clear = function(){
     this.wrap.parentNode.removeChild(this.wrap);
 };
+
+//KEYS
+var arrowCodes = {37: "left",
+                  38: "up",
+                  39: "right"};
+
+var arrows = trackKeys(arrowCodes);
+
+function trackKeys(codes){
+    var pressed = Object.create(null);
+    function handler(event){
+        if(codes.hasOwnProperty(event.keyCode)){
+            var down = event.type == "keydown";
+            pressed[codes[event.keyCode]] = down;
+            event.preventDefault();
+        }
+    }
+
+    addEventListener("keydown", handler);
+    addEventListener("keyup", handler);
+    return pressed;
+}
+
+//RUN
+function runAnimation(frameFunction){
+    var lastTime = null;
+    function frame(time){
+        var stop = false;
+        if(lastTime != null){
+            var timeStep = Math.min(time - lastTime, 100) / 1000;
+            stop = frameFunction(timeStep) === false;
+        }
+        lastTime = time;
+        if(!stop){
+            requestAnimationFrame(frame);
+        } 
+    }
+    requestAnimationFrame(frame);
+}
+
+function runLevel(level, Display, andThen){
+    var display = new Display(document.body, level);
+    runAnimation(function(step){
+        level.animate(step, arrows);
+        display.drawFrame(step);
+
+        if(level.isFinished()){
+            display.clear();
+            if(andThen){
+                andThen(level.status);
+            }
+            return false;
+        }
+    });
+}
+
+function runGame(plans, Display){
+    function startLevel(n){
+        var andThen = function(status){
+            if(status == "lost"){
+                startLevel(n);
+            }
+            else if(n < plans.length - 1){
+                startLevel(n+1);
+            }
+            else{
+                console.log("You win!");
+            }
+        };
+        runLevel(new Level(plans[n]), Display, andThen);
+    }
+
+    startLevel(0);
+}

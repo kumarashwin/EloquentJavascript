@@ -411,11 +411,17 @@ function runLevel(level, Display, andThen){
     });
 }
 
+var extraLives = 2;
 function runGame(plans, Display){
     function startLevel(n){
         var andThen = function(status){
             if(status == "lost"){
-                startLevel(n);
+                if(extraLives > 0){
+                    extraLives--;
+                    startLevel(n);
+                }
+                else
+                    console.log("You lose!");
             }
             else if(n < plans.length - 1){
                 startLevel(n+1);

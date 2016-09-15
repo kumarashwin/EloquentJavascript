@@ -48,6 +48,60 @@ Level.prototype.isFinished = function(){
     return this.status != null && this.finishDelay < 0;
 }
 
+Level.prototype.obstacleAt = function(pos, size) {
+    var xStart = Math.floor(pos.x);
+    var xEnd = Math.ceil(pos.x + size.x);
+    var yStart = Math.floor(pos.y);
+    var yEnd = Math.ceil(pos.y + size.y);
+
+    if(xStart < 0 || xEnd > this.width || yStart < 0){
+        return "wall";
+    }
+    if(yEnd > this.height){
+        return "lava";
+    }
+    for(var y = yStart; y < yEnd; y++){
+        for(var x = xStart; x < xEnd; x++){
+            var fieldType = this.grid[y][x];
+            if(fieldType){
+                return fieldType;
+            }
+        }
+    }
+};
+
+Level.prototype.actorAt = function(actor){
+    for(var i = 0; i < this.actors.length; i++){
+        var other = this.actors[i];
+
+        //If other actor is not actor, and occupies part
+        //of the same space, return it.
+        if(other != actor &&
+            actor.pos.x + actor.size.x > other.pos.x &&
+            actor.pos.x < other.pos.x + other.size.x &&
+            actor.pos.y + actor.size.y > other.pos.y &&
+            actor.pos.y < other.pos.y + other.size.y){
+                return other;
+            }
+    }
+};
+
+var maxStep = 0.05;
+
+Level.prototype.animate = function(step, keys){
+    if(this.status != null){
+        this.finishDelay -= step;
+    }
+
+    while(step > 0){
+        var thisStep = Math.min(step, maxStep);
+        this.actors.forEach(function(actor){
+            actor.act(thisStep, this, keys);
+        }, this);
+        step -= thisStep;
+    }
+};
+
 //VECTOR
 function Vector(x, y){
     this.x = x;
@@ -102,6 +156,20 @@ function Lava(pos, character){
 
 Lava.prototype.type = "lava";
 
+Lava.prototype.act = function(step, level){
+    var newPos = this.pos.plus(this.speed.times(step));
+
+    if(!level.obstacleAt(newPos, this.size)){
+        this.pos = newPos;
+    }
+    else if(this.repeatPos){
+        this.pos = this.repeatPos;
+    }
+    else{
+        this.speed = this.speed.times(-1);
+    }
+}
+
 //COIN
 function Coin(pos){
     this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
@@ -110,6 +178,15 @@ function Coin(pos){
 }
 
 Coin.prototype.type = "coin";
+
+var wobbleSpeed = 8;
+var wobbleDistance = 0.07;
+
+Coin.prototype.act = function(step){
+    this.wobble += step * wobbleSpeed;
+    var wobblePos = Math.sin(this.wobble) * wobbleDist;
+    this.pos = this.basePos.plus(new Vector(0, wobblePos));
+};
 
 //ELEMENT
 function element(name, className){

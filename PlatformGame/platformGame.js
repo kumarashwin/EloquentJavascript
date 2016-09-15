@@ -102,6 +102,23 @@ Level.prototype.animate = function(step, keys){
     }
 };
 
+Level.prototype.playerTouched = function(type, actor){
+    if(type = "lava" && this.status == null){
+        this.status = "lost";
+        this.finishDelay = 1;
+    } else if(type == "coin"){
+        this.actors = this.actors.filter(function(other){
+            return other != actor;
+        });
+        var coinsLeft = this.actors.some(function(actor){
+            return actor.type == "coin";}); 
+        if(!coinsLeft){
+            this.status = "won";
+            this.finishDelay = 1;
+        }
+    }
+};
+
 //VECTOR
 function Vector(x, y){
     this.x = x;
@@ -134,6 +151,67 @@ function Player(pos){
     this.speed = new Vector(0,0);
 }
 Player.prototype.type = "player";
+
+var playerXSpeed = 7;
+
+Player.prototype.moveX = function(step, level, keys) {
+    this.speed.x = 0;
+    if(keys.left){
+        this.speed.x -= playerXSpeed;
+    }
+    if(keys.right){
+        this.speed.x += playerXSpeed;
+    }
+
+    var motion = new Vector(this.speed.x * step, 0);
+    var newPos = this.pos.plus(motion);
+    
+    var obstacle = level.obstacleAt(newPos, this.size);
+    if(obstacle){
+        level.playerTouched(obstacle)
+    }
+    else{
+        this.pos = newPos;
+    }
+};
+
+var gravity = 30;
+var jumpSpeed = 17;
+
+Player.prototype.moveY = function(step, level, keys){
+    this.speed.y += step * gravity;
+    var motion = new Vector(0, this.speed.y * step);
+    var newPos = this.pos.plus(motion);
+    var obstacle = level.obstacleAt(newPos, this.size);
+    if(obstacle){
+        level.playerTouched(obstacle)
+        if(keys.up && this.speed > 0){
+            this.speed.y = -jumpSpeed;
+        }
+        else{
+            this.speed.y = 0;
+        }
+    }
+    else {
+        this.pos = newPos;
+    }
+};
+
+Player.prototype.act = function(step, level, keys){
+    this.moveX(step, level, keys);
+    this.moveY(step, level, keys);
+
+    var otherActor = level.actorAt(this);
+    if(otherActor){
+        level.playerTouched(otherActor.type, otherActor);
+    }
+
+    //Losing Animation
+    if(level.status = "lost"){
+        this.pos.y += step;
+        this.size.y -= step;
+    }
+};
 
 //LAVA
 function Lava(pos, character){
@@ -197,6 +275,9 @@ function element(name, className){
     return element;
 }
 
+//SCALE i.e. pixels per grid element
+var scale = 20;
+
 //DISPLAY
 function DOMDisplay(parent, level){
     this.wrap = parent.appendChild(element("div", "game"));
@@ -206,9 +287,6 @@ function DOMDisplay(parent, level){
     this.actorLayer = null;
     this.drawFrame();
 }
-
-//SCALE
-var scale = 20;
 
 DOMDisplay.prototype.drawBackground= function(){
     var table = element("table", "background");

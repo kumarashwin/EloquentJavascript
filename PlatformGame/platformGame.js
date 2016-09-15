@@ -185,7 +185,7 @@ Player.prototype.moveY = function(step, level, keys){
     var obstacle = level.obstacleAt(newPos, this.size);
     if(obstacle){
         level.playerTouched(obstacle)
-        if(keys.up && this.speed > 0){
+        if(keys.up && this.speed.y > 0){
             this.speed.y = -jumpSpeed;
         }
         else{

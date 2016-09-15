@@ -366,39 +366,41 @@ var arrowCodes = {37: "left",
 
 var paused = false;
 
-var arrows = trackKeys(arrowCodes);
+var pressedKey = Object.create(null);
+function handler(event) {
+    if (arrowCodes.hasOwnProperty(event.keyCode)) {
 
-function trackKeys(codes){
-    var pressed = Object.create(null);
-    function handler(event){
-        if(codes.hasOwnProperty(event.keyCode)){
-
-            var down;
-            if(event.type == "keydown"){
-                down = true;
-                //Escape pressed:
-                if(event.keyCode == 27){
-                    //Switch from true to false and vice-versa
-                    paused = (paused == true) ? false : true;
-                    down = paused;
-                }
+        var down;
+        if (event.type == "keydown") {
+            down = true;
+            //Escape pressed:
+            if (event.keyCode == 27) {
+                //Switch from true to false and vice-versa
+                paused = (paused == true) ? false : true;
+                down = paused;
             }
-            else{
-                down = false;
-                //keyup doesn't change paused state with Escape
-                if(event.keyCode == 27){
-                    down = paused;
-                }
-                
-            }
-            pressed[codes[event.keyCode]] = down;
-            event.preventDefault();
         }
-    }
+        else {
+            down = false;
+            //keyup doesn't change paused state with Escape
+            if (event.keyCode == 27) {
+                down = paused;
+            }
 
+        }
+        pressedKey[arrowCodes[event.keyCode]] = down;
+        event.preventDefault();
+    }
+}
+
+function trackKeys() {
     addEventListener("keydown", handler);
     addEventListener("keyup", handler);
-    return pressed;
+}
+
+function disposeKeys(){
+    removeEventListener("keydown", handler);
+    removeEventListener("keyup", handler);
 }
 
 //RUN
@@ -421,7 +423,7 @@ function runAnimation(frameFunction){
 function runLevel(level, Display, andThen){
     var display = new Display(document.body, level);
     runAnimation(function(step){
-        level.animate(step, arrows);
+        level.animate(step, pressedKey);
         display.drawFrame(step);
 
         if(level.isFinished()){
@@ -437,6 +439,7 @@ function runLevel(level, Display, andThen){
 var extraLives = 2;
 function runGame(plans, Display){
     function startLevel(n){
+
         var andThen = function(status){
             if(status == "lost"){
                 if(extraLives > 0){
@@ -444,17 +447,20 @@ function runGame(plans, Display){
                     startLevel(n);
                 }
                 else
+                    disposeKeys();
                     console.log("You lose!");
             }
             else if(n < plans.length - 1){
                 startLevel(n+1);
             }
             else{
+                disposeKeys();
                 console.log("You win!");
             }
         };
         runLevel(new Level(plans[n]), Display, andThen);
     }
 
+    trackKeys();
     startLevel(0);
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <link rel="stylesheet" href="canvasGame.css">
+    </head>
+    <body>
+
+    </body>
+    <script type="text/javascript" src="canvasGame.js"></script>
+    <script type="text/javascript">
+        var simpleLevelPlan = [
+            "                      ",
+            "                      ",
+            "  x              = x  ",
+            "  x         o o    x  ",
+            "  x @      xxxxx   x  ",
+            "  xxxxx            x  ",
+            "      x!!!!!!!!!!!!x  ",
+            "      xxxxxxxxxxxxxx  ",
+            "                      "
+        ];
+        var GAME_LEVELS = [simpleLevelPlan];
+        runGame(GAME_LEVELS, CanvasDisplay);
+    </script>
+</html>

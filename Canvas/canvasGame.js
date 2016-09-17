@@ -278,13 +278,15 @@ function element(name, className){
 }
 
 //SCALE i.e. pixels per grid element
-var scale = 20;
+var scale = 40;
 
 //DISPLAY
 function CanvasDisplay(parent, level){
     this.canvas = document.createElement("canvas");
     this.canvas.width = Math.min(600, level.width * scale);
     this.canvas.height = Math.min(450, level.height * scale);
+    
+    parent.appendChild(this.canvas);
     this.cx = this.canvas.getContext("2d");
     this.level = level;
     this.animationTime = 0;
@@ -297,7 +299,7 @@ function CanvasDisplay(parent, level){
         height: this.canvas.height / scale
     };
 
-    parent.appendChild(this.canvas);
+    
     this.drawFrame(0);
 }
 
@@ -308,6 +310,7 @@ CanvasDisplay.prototype.clear = function(){
 CanvasDisplay.prototype.drawFrame = function(step){
     this.animationTime += step;
     this.updateViewport();
+    this.clearDisplay();
     this.drawBackground();
     this.drawActors();
 };
@@ -358,7 +361,7 @@ CanvasDisplay.prototype.drawBackground = function(){
             var tile = this.level.grid[y][x];
             if(tile != null){
                 var screenX = (x - view.left) * scale;
-                var screenY = (x - view.top) * scale;
+                var screenY = (y - view.top) * scale;
                 var tileX = tile == "lava" ? scale : 0;
                 this.cx.drawImage(
                     otherSprites,
@@ -377,7 +380,7 @@ function flipHorizontally(context, around) {
 
 var playerSprites = document.createElement("img");
 playerSprites.src = "img/player_big.png";
-var playerXOverlap = 4;
+var playerXOverlap = 8;
 CanvasDisplay.prototype.drawPlayer = function(x, y, width, height){
     var sprite = 8;
     var player = this.level.player;
@@ -422,83 +425,6 @@ CanvasDisplay.prototype.drawActors = function(){
                                 x, y, width, height);
         }
     }, this);
-};
-
-function DOMDisplay(parent, level){
-    this.wrap = parent.appendChild(element("div", "game"));
-    this.level = level;
-
-    this.wrap.appendChild(this.drawBackground());
-    this.actorLayer = null;
-    this.drawFrame();
-}
-
-DOMDisplay.prototype.drawBackground= function(){
-    var table = element("table", "background");
-    table.style.width = this.level.width * scale + "px";
-    this.level.grid.forEach(function(row){
-        var rowElement = table.appendChild(element("tr"));
-        rowElement.style.height = scale + "px";
-        row.forEach(function(type){
-            rowElement.appendChild(element("td", type));
-        });
-    });
-    return table;
-};
-
-DOMDisplay.prototype.drawActors = function(){
-    var wrap = element("div");
-    this.level.actors.forEach(function(actor){
-        var rect = wrap.appendChild(element("div", "actor " + actor.type));
-
-        rect.style.width = (actor.size.x * scale) + "px";
-        rect.style.height = (actor.size.y * scale) + "px";
-        rect.style.left = (actor.pos.x * scale) + "px";
-        rect.style.top = (actor.pos.y * scale) + "px";
-    });
-    return wrap;
-};
-
-DOMDisplay.prototype.drawFrame = function(){
-    if(this.actorLayer){
-        this.wrap.removeChild(this.actorLayer);
-    }
-    this.actorLayer = this.wrap.appendChild(this.drawActors());
-    this.wrap.className = "game " + (this.level.status || "");
-    this.scrollPlayerIntoView();
-};
-
-DOMDisplay.prototype.scrollPlayerIntoView = function(){
-    var width = this.wrap.clientWidth;
-    var height = this.wrap.clientHeight;
-    var margin = width/3;
-
-    var left = this.wrap.scrollLeft;
-    var right = left + width;
-
-    var top = this.wrap.scrollTop;
-    var bottom = top + height;
-
-    var player = this.level.player;
-    var center = player.pos.plus(player.size.times(0.5)).times(scale);
-
-    if(center.x < left + margin){
-        this.wrap.scrollLeft = center.x - margin;
-    }
-    else if(center.x > right - margin){
-        this.wrap.scrollLeft = center.x + margin - width;
-    }
-
-    if(center.y < top + margin){
-        this.wrap.scrollTop = center.y - margin;
-    }
-    else if(center.y > bottom - margin){
-        this.wrap.scrollTop = center.y + margin - height;
-    }
-};
-
-DOMDisplay.prototype.clear = function(){
-    this.wrap.parentNode.removeChild(this.wrap);
 };
 
 //KEYS

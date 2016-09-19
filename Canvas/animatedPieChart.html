@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+    <body>
+        <canvas style="border: 1px solid black; background-color: grey; " width="600" height="300"></canvas>
+    </body>
+    <script type="text/javascript">
+        function drawPieChart(context, results, radius, centerX, centerY){
+            var total = results.reduce(
+                function(sum, choice) {
+                    return sum + choice.count;
+            }, 0);
+            
+            var currentAngle = (-0.5 * Math.PI);
+            var angles = [];
+            results.forEach(function(result, index) {
+                var startAngle = currentAngle;
+                var sliceAngle = (result.count / total) * 2 * Math.PI;
+                var endAngle = currentAngle + sliceAngle;
+                angles.push({startAngle: startAngle, endAngle: endAngle});
+                currentAngle =  endAngle;
+            });
+
+            context.save();
+            context.translate(centerX, centerY);
+
+            angles.forEach(function(result, index){
+                context.beginPath();
+                context.arc(0,0, radius, result.startAngle, result.endAngle);
+                context.lineTo(0,0);
+                context.fillStyle = results[index].color;
+                context.fill();
+            });
+
+            // Start at the top
+            // var currentAngle = (-0.5 * Math.PI);
+            // results.forEach(function(result) {
+            //     var sliceAngle = (result.count / total) * 2 * Math.PI;
+            //     //var stepAngle = sliceAngle/8;
+            //     var stepAngle = 0.03;
+            //     var finalAngle = currentAngle + sliceAngle;
+                
+            //     while(true){
+            //         if(currentAngle >= finalAngle)
+            //             break;
+                    
+            //         var endAngle = currentAngle + Math.min(stepAngle, finalAngle - currentAngle);
+            //         context.beginPath();
+            //         context.arc(0, 0, radius, currentAngle, endAngle);
+            //         context.lineWidth = 0;
+            //         context.lineTo(0, 0);
+                    
+            //         context.strokeStyle = result.color;
+            //         context.fillStyle = result.color;
+            //         context.fill();
+            //         //context.stroke();
+
+            //         currentAngle = endAngle;
+            //     }
+                //setInterval(animation, 3000);
+
+                // var textAngle = currentAngle - (sliceAngle/2);
+                // var textX = Math.cos(textAngle) * (radius * 1.3);
+                // var textY = Math.sin(textAngle) * (radius * 1.3);
+
+                // context.textAlign = "start";
+                // if(textX < 0)
+                //     context.textAlign = "end";
+                    
+                // context.textBaseline = "bottom";
+                // if(textY < 0)
+                //     context.textBaseline = "top";
+                    
+                // context.font = (radius * 0.15) + "px Verdana";
+                // context.fillText(result.name, textX, textY);
+            //});
+            context.restore();
+        }
+        var results = [
+            {name: "Satisfied", count: 1043, color: "lightblue"},
+            {name: "Neutral", count: 563, color: "lightgreen"},
+            {name: "Unsatisfied", count: 510, color: "pink"},
+            {name: "No comment", count: 175, color: "silver"}
+        ];
+
+        var context = document.querySelector("canvas").getContext("2d");
+        drawPieChart(context, results, 100, 150, 150);
+
+    </script>
+</html>

@@ -7,12 +7,10 @@
         <canvas style="border: 1px solid black; background-color: grey; " width="600" height="300"></canvas>
     </body>
     <script type="text/javascript">
+
         function drawPieChart(context, results, radius, centerX, centerY){
-            var total = results.reduce(
-                function(sum, choice) {
-                    return sum + choice.count;
-            }, 0);
-            
+            var total = results.reduce(function(sum, choice) {return sum + choice.count;}, 0);
+
             var currentAngle = (-0.5 * Math.PI);
             var angles = [];
             results.forEach(function(result, index) {
@@ -23,61 +21,48 @@
                 currentAngle =  endAngle;
             });
 
-            context.save();
-            context.translate(centerX, centerY);
 
+            var completed = 0;
             angles.forEach(function(result, index){
-                context.beginPath();
-                context.arc(0,0, radius, result.startAngle, result.endAngle);
-                context.lineTo(0,0);
-                context.fillStyle = results[index].color;
-                context.fill();
+                var color = results[index].color;
+                var difference = result.endAngle - result.startAngle;
+                var step = Math.min(0.03, difference * 0.03);
+
+                var radians = 30*(Math.PI/180);
+                var startAngle = result.startAngle - radians;
+                var endAngle = startAngle;
+                var doneAnimation = false;
+                var interval = setInterval(function(){
+
+                    if(index == 0)
+                        context.clearRect(0, 0, 600, 300);
+
+                    context.save();
+                    context.translate(centerX, centerY);     
+                    context.beginPath();
+                    context.arc(0,0, radius, Math.min(startAngle, result.startAngle), Math.min(endAngle, result.endAngle));
+                    context.lineTo(0,0);
+                    context.fillStyle = color;
+                    context.fill();
+                    context.restore();
+
+                    if(doneAnimation == false
+                    && result.endAngle <= endAngle
+                    && startAngle >= result.startAngle){
+                        doneAnimation = true;
+                        completed += difference;
+                    }
+
+                    if(completed >= Math.PI*2){
+                        clearInterval(interval);
+                    }
+
+                    startAngle += step/2;
+                    endAngle += step;
+                }, 30);
             });
-
-            // Start at the top
-            // var currentAngle = (-0.5 * Math.PI);
-            // results.forEach(function(result) {
-            //     var sliceAngle = (result.count / total) * 2 * Math.PI;
-            //     //var stepAngle = sliceAngle/8;
-            //     var stepAngle = 0.03;
-            //     var finalAngle = currentAngle + sliceAngle;
-                
-            //     while(true){
-            //         if(currentAngle >= finalAngle)
-            //             break;
-                    
-            //         var endAngle = currentAngle + Math.min(stepAngle, finalAngle - currentAngle);
-            //         context.beginPath();
-            //         context.arc(0, 0, radius, currentAngle, endAngle);
-            //         context.lineWidth = 0;
-            //         context.lineTo(0, 0);
-                    
-            //         context.strokeStyle = result.color;
-            //         context.fillStyle = result.color;
-            //         context.fill();
-            //         //context.stroke();
-
-            //         currentAngle = endAngle;
-            //     }
-                //setInterval(animation, 3000);
-
-                // var textAngle = currentAngle - (sliceAngle/2);
-                // var textX = Math.cos(textAngle) * (radius * 1.3);
-                // var textY = Math.sin(textAngle) * (radius * 1.3);
-
-                // context.textAlign = "start";
-                // if(textX < 0)
-                //     context.textAlign = "end";
-                    
-                // context.textBaseline = "bottom";
-                // if(textY < 0)
-                //     context.textBaseline = "top";
-                    
-                // context.font = (radius * 0.15) + "px Verdana";
-                // context.fillText(result.name, textX, textY);
-            //});
-            context.restore();
         }
+
         var results = [
             {name: "Satisfied", count: 1043, color: "lightblue"},
             {name: "Neutral", count: 563, color: "lightgreen"},
@@ -87,6 +72,5 @@
 
         var context = document.querySelector("canvas").getContext("2d");
         drawPieChart(context, results, 100, 150, 150);
-
     </script>
 </html>

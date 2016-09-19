@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+    <body>
+        <canvas style="border: 1px solid black;" width="800" height="200"></canvas>
+    </body>
+    <script type="text/javascript">
+        
+        function drawSpiral(centerX, centerY, cx, numberOfLines){
+            cx.save();
+            cx.translate(centerX, centerY);
+            cx.beginPath();
+            cx.moveTo(0,0);
+            var angle = 0;
+            var factor = 1;
+            var x, y;
+            for(var i = 0; i < numberOfLines; i++){
+                x = Math.cos(angle) * factor;
+                y = Math.sin(angle) * factor;
+                cx.lineTo(x, y);
+                angle += Math.PI/(Math.ceil(numberOfLines/4));
+                factor++;
+            }
+            cx.stroke();
+            cx.restore();
+        }
+
+        function drawStar(centerX, centerY, cx, size){
+            cx.save();
+            cx.translate(centerX, centerY);
+            cx.beginPath();
+        
+            var angle = 0;
+            var radians;
+            var endX, endY;
+            cx.moveTo(Math.cos(angle) * size, Math.sin(angle) * size);
+
+            for(var i = 0; i < 8; i++)
+            {   
+                angle += 45;
+                radians = angle*(Math.PI/180);
+                endX = Math.cos(radians) * size;
+                endY = Math.sin(radians) * size;
+                cx.quadraticCurveTo(0, 0, endX, endY);
+            }
+            cx.fillStyle = "orange";
+            cx.fill();
+            cx.restore();
+        }
+
+        var cx = document.querySelector("canvas").getContext("2d");
+        drawSpiral(500, 110, cx, 100);
+        drawStar(700, 100, cx, 70);
+    </script>
+</html>

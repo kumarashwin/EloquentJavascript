@@ -11,12 +11,12 @@
                 Maybe: <input type="text" name="maybe" value="510"><br>
                 Not Sure: <input type="text" name="notSure" value="175">
         </div>
-
-        <textarea name="" id="" cols="30" rows="10" tabindex="-1"></textarea>
         <canvas style="border: 0px solid black;" width="300" height="300"></canvas>
+        <textarea name="" id="" cols="30" rows="10"></textarea>
     </body>
     <script type="text/javascript">
 
+//====== PIE CHART =====================
         function drawPieChart(context, results, radius, centerX, centerY, stroke, strokeWidth){
             var angles = [];
             var doneAnimation = false;
@@ -104,61 +104,68 @@
                 }, 30);
             });
         }
-
-        // var results = [
-        //     {name: "Satisfied", count: 1043, color: "lightblue"},
-        //     {name: "Neutral", count: 563, color: "lightgreen"},
-        //     {name: "Unsatisfied", count: 510, color: "pink"},
-        //     {name: "No comment", count: 175, color: "silver"}
-        // ];
+//========== END OF PIE DRAWING PART ========
 
         var context = document.querySelector("canvas").getContext("2d");
         var inputs = document.querySelectorAll("input");
         var controls = document.getElementById("controls");
+        var dataModified = false;
 
-        // controls.addEventListener("click", function(even){
-        //     controls.style.boxShadow = "0 0 20px lightblue";
-        // });
+        //FOCUS
+        controls.addEventListener("click", function(event){
+            if(event.target.nodeName == "INPUT")
+                controls.style.boxShadow = "0 0 20px lightblue";
+                dataModified = true;
+        });
 
+        //UNFOCUS
         document.addEventListener("click", function(event){
             if(event.target != controls
-            && event.target.parentNode != controls){
+            && event.target.parentNode != controls
+            && dataModified){
                 clearShadowAndRedrawChart();
             }
         })
 
+        //KEYBOARD INPUT
+        controls.addEventListener("keydown", function(event){
+            //'Save' i.e. redraw the chart
+            if(event.key == "Enter" || event.key == "Escape"){
+                event.preventDefault();
+                event.target.blur();
+                clearShadowAndRedrawChart();
+            }
+            //Traverse through the inputs
+            else if(event.key == "Tab"){
+                //Last element; Shift NOT pressed
+                if(!event.shiftKey && event.target == inputs[inputs.length - 1]){
+                    inputs[0].focus();
+                    event.preventDefault();
+                }
+                //First element; Shift pressed
+                else if(event.shiftKey && event.target == inputs[0]){
+                    inputs[inputs.length - 1].focus();
+                    event.preventDefault();
+                }
+                //Otherwise, operate as normal
+            }
+            //Only allow permitted input
+            else if(!/(\d|\.|Tab|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
+                event.preventDefault();
+            }
+        })
+        
         //TEMPORARY HACK!!
         function clearShadowAndRedrawChart(){
             for(var i = 0; i < inputs.length; i++){
                 results[inputs[i].getAttribute("name")].count = parseInt(inputs[i].value);
             }
             controls.style.boxShadow = "";
+            dataModified = false;
             drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
         }
 
-        //Key input validation
-        controls.addEventListener("keydown", function(event){
-            if(event.key == "Enter" || event.key == "Escape"){
-                event.preventDefault();
-                event.target.blur();
-                clearShadowAndRedrawChart();
-            }
-            else if(!/(\d|\.|Tab|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
-                event.preventDefault();
-            }
-        })
-
-        var tabIndex = 1;
-        for(var i = 0; i < inputs.length; i++){
-            inputs[i].addEventListener("focus", function(event){
-                event.target.parentNode.style.boxShadow = "0 0 20px lightblue";
-                if(tabIndex <= inputs.length)
-                    event.target.tabIndex = tabIndex++;
-                console.log(event.target.tabIndex);
-            });
-        }
-        
-        //TEMPORARY:
+        //TEMPORARY HACK!!
         function convertData(data){
             var result = [];
             var names = Object.getOwnPropertyNames(data);
@@ -168,6 +175,7 @@
             return result;
         }
 
+        //MAIN    
         var results = {
             yes:{count: 1043, color: "lightblue"},
             no:{count: 563, color: "lightgreen"},
@@ -176,6 +184,5 @@
         };
 
         drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
-        //drawPieChart(context, convertData(results), 100, 150, 150);
     </script>
 </html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+    <body style="padding: 20px;">
+        <div id="controls" style="width: 260px; padding: 10px; border: 0 solid black;">
+            <!-- Year: <input type="text" name="" value=""><br> --> 
+                Yes: <input type="text" name="yes" value="1043"><br>
+                No: <input type="text" name="no" value="563"><br>
+                Maybe: <input type="text" name="maybe" value="510"><br>
+                Not Sure: <input type="text" name="notSure" value="175">
+        </div>
+        <canvas style="border: 0px solid black;" width="300" height="300"></canvas>
+        <textarea name="" id="" cols="30" rows="10"></textarea>
+    </body>
+    <script type="text/javascript" src="pieChart.js"></script>
+    <script type="text/javascript">
+
+        var context = document.querySelector("canvas").getContext("2d");
+        var inputs = document.querySelectorAll("input");
+        var controls = document.getElementById("controls");
+        var dataModified = false;
+
+        //FOCUS
+        controls.addEventListener("click", function(event){
+            if(event.target.nodeName == "INPUT")
+                controls.style.boxShadow = "0 0 20px lightblue";
+                dataModified = true;
+        });
+
+        //UNFOCUS
+        document.addEventListener("click", function(event){
+            if(event.target != controls
+            && event.target.parentNode != controls
+            && dataModified){
+                clearShadowAndRedrawChart();
+            }
+        })
+
+        //KEYBOARD INPUT
+        controls.addEventListener("keydown", function(event){
+            //'Save' i.e. redraw the chart
+            if(event.key == "Enter" || event.key == "Escape"){
+                event.preventDefault();
+                event.target.blur();
+                clearShadowAndRedrawChart();
+            }
+            //Traverse through the inputs
+            else if(event.key == "Tab"){
+                //Last element; Shift NOT pressed
+                if(!event.shiftKey && event.target == inputs[inputs.length - 1]){
+                    inputs[0].focus();
+                    event.preventDefault();
+                }
+                //First element; Shift pressed
+                else if(event.shiftKey && event.target == inputs[0]){
+                    inputs[inputs.length - 1].focus();
+                    event.preventDefault();
+                }
+                //Otherwise, operate as normal
+            }
+            //Only allow permitted input
+            else if(!/(\d|\.|Tab|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
+                event.preventDefault();
+            }
+        })
+        
+        //TEMPORARY HACK!!
+        function clearShadowAndRedrawChart(){
+            for(var i = 0; i < inputs.length; i++){
+                results[inputs[i].getAttribute("name")].count = parseInt(inputs[i].value);
+            }
+            controls.style.boxShadow = "";
+            dataModified = false;
+            drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+        }
+
+        //TEMPORARY HACK!!
+        function convertData(data){
+            var result = [];
+            var names = Object.getOwnPropertyNames(data);
+            names.forEach(function(name){
+                result.push({name:name, count: data[name].count, color: data[name].color});
+            });
+            return result;
+        }
+
+        //MAIN    
+        var results = {
+            yes:{count: 1043, color: "lightblue"},
+            no:{count: 563, color: "lightgreen"},
+            maybe:{count: 510, color: "pink"},
+            notSure:{count: 175, color: "silver"}
+        };
+
+        drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+    </script>
+</html>

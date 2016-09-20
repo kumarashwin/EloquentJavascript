@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+    <body>
+        <div id="controls">
+            <!-- Year: <input type="text" name="" value=""><br> --> 
+                Yes: <input type="text" name="yes" value="1043"><br>
+                No: <input type="text" name="no" value="563"><br>
+                Maybe: <input type="text" name="maybe" value="510"><br>
+                Not Sure: <input type="text" name="notSure" value="175">
+        </div>
+        <canvas style="border: 1px solid black; background-color: grey;" width="400" height="400"></canvas>
+    </body>
+    <script type="text/javascript">
+
+        function drawPieChart(context, results, radius, centerX, centerY, stroke, strokeWidth){
+            var angles = [];
+            var doneAnimation = false;
+            var dumpInterval = false;
+
+            //AWW YEAH, using closures!
+            function clearFactory(radius, centerX, centerY, stroke, strokeWidth){
+                radius *= 1.1; //Some padding to be sure;
+                return function(){
+                    context.clearRect(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+                }
+            };
+            var clear = clearFactory(radius, centerX, centerY, stroke, strokeWidth);
+
+            if(stroke === true && strokeWidth){
+                strokeWidth = Math.max(strokeWidth, 40);
+                radius = radius - (strokeWidth/2);
+            }
+
+            //First element starts at 90 degrees
+            var startAngle = (-0.5 * Math.PI);
+            var endAngle;
+            var total = results.reduce(function(sum, choice) {return sum + choice.count;}, 0);
+            
+            for(var i = 0; i < results.length; i++){
+                var sliceAngle = (results[i].count / total) * 2 * Math.PI;
+                endAngle = startAngle + sliceAngle;
+                angles.push({startAngle: startAngle, endAngle: endAngle});
+                startAngle = endAngle;
+            }
+
+            angles.forEach(function(result, index){
+                var color = results[index].color;
+                var difference = result.endAngle - result.startAngle;
+                var step = Math.max(0.05, difference * 0.05);
+                var startAngle = result.startAngle - (30*(Math.PI/180));
+                var endAngle = startAngle;
+            
+                var interval = setInterval(function(){
+                    if(index == 0){
+                        //In a new chain, if all elements are done animating
+                        if(doneAnimation)
+                            //Initiate dump of the interval
+                            dumpInterval = true;
+                        else
+                            clear();
+                    }                    
+
+                    if(dumpInterval){
+                        clearInterval(interval);
+                    }
+                    else {
+                        context.save();
+                        context.translate(centerX, centerY);     
+                        context.beginPath();
+                        context.arc(0,0, radius, Math.min(startAngle, result.startAngle), Math.min(endAngle, result.endAngle));
+                        
+                        if(stroke === true){
+                            context.strokeStyle = color;
+                            context.lineWidth = strokeWidth;
+                            context.stroke();
+                        } else {
+                            context.lineTo(0,0);
+                            context.fillStyle = color;
+                            context.fill();
+                        }
+
+                        context.restore();
+                    
+                        if(endAngle >= result.endAngle 
+                        && startAngle >= result.startAngle){
+                            //First element start the verification chain
+                            if(index == 0)
+                                doneAnimation = true;
+                            else
+                            //All other following elements continue the verification
+                                doneAnimation = doneAnimation && true;
+                        }
+                        else {
+                            doneAnimation = false;
+                            startAngle += step/2;
+                            endAngle += step;
+                        }
+                    }
+                }, 30);
+            });
+        }
+
+        // var results = [
+        //     {name: "Satisfied", count: 1043, color: "lightblue"},
+        //     {name: "Neutral", count: 563, color: "lightgreen"},
+        //     {name: "Unsatisfied", count: 510, color: "pink"},
+        //     {name: "No comment", count: 175, color: "silver"}
+        // ];
+
+        var context = document.querySelector("canvas").getContext("2d");
+        var controls = document.querySelectorAll("input");
+        for(var i = 0; i < controls.length; i++){
+            controls[i].addEventListener("blur", function(event){
+                results[event.target.getAttribute("name")].count = parseInt(event.target.value);
+                drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+            });
+        }
+        
+        //TEMPORARY:
+        function convertData(data){
+            var result = [];
+            var names = Object.getOwnPropertyNames(data);
+            names.forEach(function(name){
+                result.push({name:name, count: data[name].count, color: data[name].color});
+            });
+            return result;
+        }
+
+        var results = {
+            yes:{count: 1043, color: "lightblue"},
+            no:{count: 563, color: "lightgreen"},
+            maybe:{count: 510, color: "pink"},
+            notSure:{count: 175, color: "silver"}
+        };
+
+        //drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+        drawPieChart(context, convertData(results), 100, 150, 150);
+    </script>
+</html>

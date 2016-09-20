@@ -24,9 +24,14 @@
 
         //FOCUS
         controls.addEventListener("click", function(event){
-            if(event.target.nodeName == "INPUT")
+            if(event.target.nodeName == "INPUT"){
                 controls.style.boxShadow = "0 0 20px lightblue";
                 dataModified = true;
+                //Add tabIndexes, so we can tab through them
+                for(var i = 0; i < inputs.length; i++){
+                    inputs[i].tabIndex = 0;
+                }
+            }
         });
 
         //UNFOCUS
@@ -41,10 +46,16 @@
         //KEYBOARD INPUT
         controls.addEventListener("keydown", function(event){
             //'Save' i.e. redraw the chart
-            if(event.key == "Enter" || event.key == "Escape"){
+            if(event.key == "Enter"){
                 event.preventDefault();
-                event.target.blur();
-                clearShadowAndRedrawChart();
+                event.target.blur();         // Unfocus the input element
+                clearShadowAndRedrawChart(); // Save input by default
+            }
+            else if(event.key == "Escape")
+            {
+                event.preventDefault();          
+                event.target.blur();             // Unfocus the input element
+                clearShadowAndRedrawChart(true); // Discard input data
             }
             //Traverse through the inputs
             else if(event.key == "Tab"){
@@ -61,15 +72,21 @@
                 //Otherwise, operate as normal
             }
             //Only allow permitted input
-            else if(!/(\d|\.|Tab|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
+            else if(!/(\d|\.|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
                 event.preventDefault();
             }
         })
         
         //TEMPORARY HACK!!
-        function clearShadowAndRedrawChart(){
+        function clearShadowAndRedrawChart(discardInputs){
             for(var i = 0; i < inputs.length; i++){
-                results[inputs[i].getAttribute("name")].count = parseInt(inputs[i].value);
+                //Clear tabIndexes!
+                inputs[i].tabIndex = -1;
+
+                if (discardInputs)//Don't save! Reset values!
+                    inputs[i].value = results[inputs[i].getAttribute("name")].count;
+                else //Default: Save values
+                    results[inputs[i].getAttribute("name")].count = parseInt(inputs[i].value);
             }
             controls.style.boxShadow = "";
             dataModified = false;
@@ -94,6 +111,6 @@
             notSure:{count: 175, color: "silver"}
         };
 
-        drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+        clearShadowAndRedrawChart();
     </script>
 </html>

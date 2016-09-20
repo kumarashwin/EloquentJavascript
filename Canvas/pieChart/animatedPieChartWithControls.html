@@ -4,13 +4,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     </head>
     <body style="padding: 20px;">
-        <div id="controls" style="width: 260px; padding: 10px; border: 0 solid black;">
-            Yes: <input type="text" name="yes" value="1043"><br>
-            No: <input type="text" name="no" value="563"><br>
-            Maybe: <input type="text" name="maybe" value="510"><br>
-            Not Sure: <input type="text" name="notSure" value="175">
+        <div id="controls" style="width: 300px; padding: 10px; border: 0 solid black;">
+                <div style="padding: 0 15%;">
+                    Yes: <input type="text" name="yes" value="1043"><br>
+                    No: <input type="text" name="no" value="563"><br>
+                    Maybe: <input type="text" name="maybe" value="510"><br>
+                    Not Sure: <input type="text" name="notSure" value="175">
+                </div>
+            <canvas style="border: 0 solid black;" width="300" height="300"></canvas>
         </div>
-        <canvas style="border: 0px solid black;" width="300" height="300"></canvas>
     </body>
     <script type="text/javascript" src="pieChart.js"></script>
     <script type="text/javascript">
@@ -34,10 +36,20 @@
 
         //UNFOCUS
         document.addEventListener("click", function(event){
-            if(event.target != controls
-            && event.target.parentNode != controls
-            && dataModified){
-                redrawChart();
+            var node = event.target;
+            while(true){
+                if(node == null){ // If our search has reached the element beyond the 'controls'
+                    if(dataModified){   // Redraw if there was a modification;
+                        redrawChart();
+                    }
+                    break;
+                }
+                else if(node != controls){ // This element isn't controls, but could be a child
+                    node = node.parentNode;
+                }
+                else {  
+                    break; // Aha! The target was within the controls element!
+                }
             }
         });
 

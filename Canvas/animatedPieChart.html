@@ -21,44 +21,55 @@
                 currentAngle =  endAngle;
             });
 
-
-            var completed = 0;
+            var doneAnimation = false;
+            var dumpInterval = false;
             angles.forEach(function(result, index){
                 var color = results[index].color;
                 var difference = result.endAngle - result.startAngle;
-                var step = Math.min(0.03, difference * 0.03);
-
-                var radians = 30*(Math.PI/180);
-                var startAngle = result.startAngle - radians;
+                var step = Math.max(0.03, difference * 0.03);
+                var startAngle = result.startAngle - (30*(Math.PI/180));
                 var endAngle = startAngle;
-                var doneAnimation = false;
+            
                 var interval = setInterval(function(){
+                    if(index == 0){
+                        //In a new chain, if all elements are done animating
+                        if(doneAnimation){
+                            //Initiate dump of the interval
+                            dumpInterval = true;
+                        }
+                        else {
+                            context.clearRect(0, 0, 600, 300);    
+                        }                        
+                    }                        
 
-                    if(index == 0)
-                        context.clearRect(0, 0, 600, 300);
-
-                    context.save();
-                    context.translate(centerX, centerY);     
-                    context.beginPath();
-                    context.arc(0,0, radius, Math.min(startAngle, result.startAngle), Math.min(endAngle, result.endAngle));
-                    context.lineTo(0,0);
-                    context.fillStyle = color;
-                    context.fill();
-                    context.restore();
-
-                    if(doneAnimation == false
-                    && result.endAngle <= endAngle
-                    && startAngle >= result.startAngle){
-                        doneAnimation = true;
-                        completed += difference;
-                    }
-
-                    if(completed >= Math.PI*2){
+                    if(dumpInterval){
                         clearInterval(interval);
                     }
-
-                    startAngle += step/2;
-                    endAngle += step;
+                    else {
+                        context.save();
+                        context.translate(centerX, centerY);     
+                        context.beginPath();
+                        context.arc(0,0, radius, Math.min(startAngle, result.startAngle), Math.min(endAngle, result.endAngle));
+                        context.lineTo(0,0);
+                        context.fillStyle = color;
+                        context.fill();
+                        context.restore();
+                    
+                        if(endAngle >= result.endAngle 
+                        && startAngle >= result.startAngle){
+                            //First element start the verification chain
+                            if(index == 0)
+                                doneAnimation = true;
+                            else
+                            //All other following elements continue the verification
+                                doneAnimation = doneAnimation && true;
+                        }
+                        else {
+                            doneAnimation = false;
+                            startAngle += step/2;
+                            endAngle += step;
+                        }
+                    }
                 }, 30);
             });
         }

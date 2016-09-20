@@ -3,15 +3,17 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     </head>
-    <body>
-        <div id="controls">
+    <body style="padding: 20px;">
+        <div id="controls" style="width: 260px; padding: 10px; border: 0 solid black;">
             <!-- Year: <input type="text" name="" value=""><br> --> 
                 Yes: <input type="text" name="yes" value="1043"><br>
                 No: <input type="text" name="no" value="563"><br>
                 Maybe: <input type="text" name="maybe" value="510"><br>
                 Not Sure: <input type="text" name="notSure" value="175">
         </div>
-        <canvas style="border: 1px solid black; background-color: grey;" width="400" height="400"></canvas>
+
+        <textarea name="" id="" cols="30" rows="10" tabindex="-1"></textarea>
+        <canvas style="border: 0px solid black;" width="300" height="300"></canvas>
     </body>
     <script type="text/javascript">
 
@@ -111,11 +113,48 @@
         // ];
 
         var context = document.querySelector("canvas").getContext("2d");
-        var controls = document.querySelectorAll("input");
-        for(var i = 0; i < controls.length; i++){
-            controls[i].addEventListener("blur", function(event){
-                results[event.target.getAttribute("name")].count = parseInt(event.target.value);
-                drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+        var inputs = document.querySelectorAll("input");
+        var controls = document.getElementById("controls");
+
+        // controls.addEventListener("click", function(even){
+        //     controls.style.boxShadow = "0 0 20px lightblue";
+        // });
+
+        document.addEventListener("click", function(event){
+            if(event.target != controls
+            && event.target.parentNode != controls){
+                clearShadowAndRedrawChart();
+            }
+        })
+
+        //TEMPORARY HACK!!
+        function clearShadowAndRedrawChart(){
+            for(var i = 0; i < inputs.length; i++){
+                results[inputs[i].getAttribute("name")].count = parseInt(inputs[i].value);
+            }
+            controls.style.boxShadow = "";
+            drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+        }
+
+        //Key input validation
+        controls.addEventListener("keydown", function(event){
+            if(event.key == "Enter" || event.key == "Escape"){
+                event.preventDefault();
+                event.target.blur();
+                clearShadowAndRedrawChart();
+            }
+            else if(!/(\d|\.|Tab|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
+                event.preventDefault();
+            }
+        })
+
+        var tabIndex = 1;
+        for(var i = 0; i < inputs.length; i++){
+            inputs[i].addEventListener("focus", function(event){
+                event.target.parentNode.style.boxShadow = "0 0 20px lightblue";
+                if(tabIndex <= inputs.length)
+                    event.target.tabIndex = tabIndex++;
+                console.log(event.target.tabIndex);
             });
         }
         
@@ -136,7 +175,7 @@
             notSure:{count: 175, color: "silver"}
         };
 
-        //drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
-        drawPieChart(context, convertData(results), 100, 150, 150);
+        drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+        //drawPieChart(context, convertData(results), 100, 150, 150);
     </script>
 </html>

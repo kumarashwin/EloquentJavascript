@@ -5,14 +5,12 @@
     </head>
     <body style="padding: 20px;">
         <div id="controls" style="width: 260px; padding: 10px; border: 0 solid black;">
-            <!-- Year: <input type="text" name="" value=""><br> --> 
-                Yes: <input type="text" name="yes" value="1043"><br>
-                No: <input type="text" name="no" value="563"><br>
-                Maybe: <input type="text" name="maybe" value="510"><br>
-                Not Sure: <input type="text" name="notSure" value="175">
+            Yes: <input type="text" name="yes" value="1043"><br>
+            No: <input type="text" name="no" value="563"><br>
+            Maybe: <input type="text" name="maybe" value="510"><br>
+            Not Sure: <input type="text" name="notSure" value="175">
         </div>
         <canvas style="border: 0px solid black;" width="300" height="300"></canvas>
-        <textarea name="" id="" cols="30" rows="10"></textarea>
     </body>
     <script type="text/javascript" src="pieChart.js"></script>
     <script type="text/javascript">
@@ -39,26 +37,14 @@
             if(event.target != controls
             && event.target.parentNode != controls
             && dataModified){
-                clearShadowAndRedrawChart();
+                redrawChart();
             }
-        })
+        });
 
         //KEYBOARD INPUT
         controls.addEventListener("keydown", function(event){
-            //'Save' i.e. redraw the chart
-            if(event.key == "Enter"){
-                event.preventDefault();
-                event.target.blur();         // Unfocus the input element
-                clearShadowAndRedrawChart(); // Save input by default
-            }
-            else if(event.key == "Escape")
-            {
-                event.preventDefault();          
-                event.target.blur();             // Unfocus the input element
-                clearShadowAndRedrawChart(true); // Discard input data
-            }
             //Traverse through the inputs
-            else if(event.key == "Tab"){
+            if(event.key == "Tab"){
                 //Last element; Shift NOT pressed
                 if(!event.shiftKey && event.target == inputs[inputs.length - 1]){
                     inputs[0].focus();
@@ -69,24 +55,26 @@
                     inputs[inputs.length - 1].focus();
                     event.preventDefault();
                 }
-                //Otherwise, operate as normal
+                //Otherwise, default operation
             }
-            //Only allow permitted input
-            else if(!/(\d|\.|Backspace|Up|ArrowLeft|ArrowRight)/.test(event.key)){
-                event.preventDefault();
+            else if(!/(\d|\.|Backspace|ArrowLeft|ArrowRight)/.test(event.key)){
+                event.preventDefault(); //Only allow permitted input
+                if(event.key == "Enter" || event.key == "Escape"){
+                    event.target.blur(); // Unfocus the input element
+                    redrawChart(event.key == "Enter"); // ONLY WAY TO SAVE INPUT!!
+                }
             }
-        })
+        });
         
-        //TEMPORARY HACK!!
-        function clearShadowAndRedrawChart(discardInputs){
+        //RENDER
+        function redrawChart(saveInput){
             for(var i = 0; i < inputs.length; i++){
-                //Clear tabIndexes!
-                inputs[i].tabIndex = -1;
+                inputs[i].tabIndex = -1; //Clear tabIndexes!
 
-                if (discardInputs)//Don't save! Reset values!
-                    inputs[i].value = results[inputs[i].getAttribute("name")].count;
-                else //Default: Save values
+                if (saveInput)//Save if specified
                     results[inputs[i].getAttribute("name")].count = parseInt(inputs[i].value);
+                else //Default: Reset values
+                    inputs[i].value = results[inputs[i].getAttribute("name")].count;
             }
             controls.style.boxShadow = "";
             dataModified = false;
@@ -111,6 +99,6 @@
             notSure:{count: 175, color: "silver"}
         };
 
-        clearShadowAndRedrawChart();
+        redrawChart();    //Initial draw
     </script>
 </html>

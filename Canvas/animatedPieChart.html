@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     </head>
     <body>
-        <canvas style="border: 1px solid black; background-color: grey; " width="600" height="300"></canvas>
+        <canvas style="border: 1px solid black; background-color: grey; " width="900" height="400"></canvas>
     </body>
     <script type="text/javascript">
 
@@ -38,7 +38,7 @@
                             dumpInterval = true;
                         }
                         else {
-                            context.clearRect(0, 0, 600, 300);    
+                            context.clearRect(centerX - radius, centerY - radius, centerX + radius, centerY + radius);    
                         }                        
                     }                        
 
@@ -81,7 +81,15 @@
             {name: "No comment", count: 175, color: "silver"}
         ];
 
+        var results2 = [
+            {name: "Satisfied", count: 1343, color: "lightblue"},
+            {name: "Neutral", count: 346, color: "lightgreen"},
+            {name: "Unsatisfied", count: 312, color: "pink"},
+            {name: "No comment", count: 275, color: "silver"}
+        ];
+
         var context = document.querySelector("canvas").getContext("2d");
         drawPieChart(context, results, 100, 150, 150);
+        drawPieChart(context, results2, 150, 500, 200);
     </script>
 </html>

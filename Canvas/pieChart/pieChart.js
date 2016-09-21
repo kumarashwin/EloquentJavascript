@@ -1,13 +1,13 @@
 
 //====== PIE CHART =====================
-function PieChart(context, results, radius, centerX, centerY, stroke, strokeWidth) {
+function PieChart(context, results, radius, posX, posY, stroke, strokeWidth) {
     this.context = context;
     this.data = results;
     this.slices = [];
     this.doneAnimation = false;
     this.dumpInterval = false;
-    this.posX = centerX;
-    this.posY = centerY;
+    this.posX = posX;
+    this.posY = posY;
     this.totalObservations = this.data.reduce(function (sum, choice) { return sum + choice.count; }, 0);
 
     this.size = radius;
@@ -28,10 +28,10 @@ function PieChart(context, results, radius, centerX, centerY, stroke, strokeWidt
 }
 
 //AWW YEAH, using closures!
-PieChart.prototype.clearFactory = function(radius, centerX, centerY){
-    radius *= 1.1; //Some padding to be sure;
+PieChart.prototype.clearFactory = function(size, posX, posY){
+    size *= 1.1; //Some padding to be sure;
     return function(){
-        this.context.clearRect(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+        this.context.clearRect(posX - size, posY - size, posX + size, posY + size);
     }
 };
 
@@ -66,7 +66,7 @@ function Slice(color, beginning, end){
 
     //For step-by-step animation:
     this.startAngle = this.endAngle = this.beginning - (2*Math.PI/12); // beginning - 30 degrees
-    this.step = Math.max(0.1, (this.beginning - this.end) * 0.1); // Minimum 0.1 upto 10% of slice's angle
+    this.step = Math.max(0.05, (this.end - this.beginning) * 0.05); // Minimum 0.05 upto 5% of slice's angle
 }
 
 PieChart.prototype.draw = function(_this){

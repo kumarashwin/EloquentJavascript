@@ -66,16 +66,22 @@ function Slice(color, beginning, end){
 
     //For step-by-step animation:
     this.startAngle = this.endAngle = this.beginning - (2*Math.PI/12); // beginning - 30 degrees
-    this.step = Math.max(0.05, (this.beginning - this.end) * 0.05); // Minimum 0.05 upto 5% of slice's angle
+    this.step = Math.max(0.1, (this.beginning - this.end) * 0.1); // Minimum 0.1 upto 10% of slice's angle
 }
 
 PieChart.prototype.draw = function(_this){
+
+    //TESTING:
+    // var slice = _this.slices[0];
+    // var index = 0;
     _this.slices.forEach(function(slice, index){
         var interval = setInterval(function(){
-            if (index == 0 && _this.doneAnimation) // In a new chain, if all elements are done animating
-                _this.dumpInterval = true;         // initiate dump of the interval
-            else
-                _this.clear()                      // Otherwise, clear the canvas
+            if (index == 0){                    // In a new chain,
+                if(_this.doneAnimation)         // if all elements are done animating,
+                    _this.dumpInterval = true;  // initiate dump of the interval
+                else
+                    _this.clear();              // Otherwise, clear the canvas
+            }
 
             if (_this.dumpInterval) {
                 clearInterval(interval); // End animation for the slices

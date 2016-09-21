@@ -1,8 +1,8 @@
 
 //====== PIE CHART =====================
-function PieChart(context, results, radius, posX, posY, stroke, strokeWidth) {
+function PieChart(context, data, radius, posX, posY, stroke, strokeWidth) {
     this.context = context;
-    this.data = results;
+    this.data = data;
     this.slices = [];
     this.doneAnimation = false;
     this.dumpInterval = false;
@@ -25,6 +25,16 @@ function PieChart(context, results, radius, posX, posY, stroke, strokeWidth) {
     this.clear = this.clearFactory(this.size, this.posX, this.posY);
     this.populateSlices();
     this.draw(this);
+}
+
+function Slice(color, beginning, end){
+    this.color = color;
+    this.beginning = beginning;
+    this.end = end;
+
+    //For step-by-step animation:
+    this.startAngle = this.endAngle = this.beginning - (2*Math.PI/12); // beginning - 30 degrees
+    this.step = Math.max(0.05, (this.end - this.beginning) * 0.05); // Minimum 0.05 upto 5% of slice's angle
 }
 
 //AWW YEAH, using closures!
@@ -59,21 +69,7 @@ PieChart.prototype.paint = function(color){
     }
 };
 
-function Slice(color, beginning, end){
-    this.color = color;
-    this.beginning = beginning;
-    this.end = end;
-
-    //For step-by-step animation:
-    this.startAngle = this.endAngle = this.beginning - (2*Math.PI/12); // beginning - 30 degrees
-    this.step = Math.max(0.05, (this.end - this.beginning) * 0.05); // Minimum 0.05 upto 5% of slice's angle
-}
-
 PieChart.prototype.draw = function(_this){
-
-    //TESTING:
-    // var slice = _this.slices[0];
-    // var index = 0;
     _this.slices.forEach(function(slice, index){
         var interval = setInterval(function(){
             if (index == 0){                    // In a new chain,
@@ -98,13 +94,13 @@ PieChart.prototype.draw = function(_this){
                 _this.context.restore();
 
                 if (slice.endAngle == slice.end && slice.startAngle == slice.beginning){ // If animation complete,
-                    if (index == 0) // First element starts the verification chain
+                    if (index == 0)                                 // First element starts the verification chain
                         _this.doneAnimation = true;
                     else
                         _this.doneAnimation = _this.doneAnimation && true; //All other following elements continue the verification
                 }
                 else {                                      
-                    _this.doneAnimation = false; // Otherwise, if one slice hasn't finished, 
+                    _this.doneAnimation = false;            // Otherwise, if one slice hasn't finished, 
                     slice.startAngle += slice.step / 2;     // it sets the doneAnimation to 'false'
                     slice.endAngle += slice.step;           // and increases the relevant variables
                 }

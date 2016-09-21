@@ -90,7 +90,8 @@
             }
             controls.style.boxShadow = "";
             dataModified = false;
-            drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+            //drawPieChart(context, convertData(results), 100, 150, 150, true, 28);
+            var pieChart = new PieChart(context, convertData(results), 100, 150, 150);
         }
 
         //TEMPORARY HACK!!

@@ -9,7 +9,7 @@ function PieChart(context, data, radius, posX, posY, stroke, strokeWidth) {
     this.posX = posX;
     this.posY = posY;
     this.clear = this.clearFactory(radius, this.posX, this.posY);
-    this.totalObservations = this.data.reduce(function (sum, choice) { return sum + choice.count; }, 0);
+    this.totalObservations = this.data.reduce(function (sum, choice) { return sum + choice.value; }, 0);
 
     this.size = radius;
     if(stroke === true){                    // Determine if style is hollow i.e. we use strokes
@@ -50,7 +50,7 @@ PieChart.prototype.populateSlices = function(){
     var endAngle;
     for (var i = 0; i < this.data.length; i++) {
         var slice = this.data[i];
-        var sliceAngle = (slice.count / this.totalObservations) * 2 * Math.PI; // Percentage of a full circle
+        var sliceAngle = (slice.value / this.totalObservations) * 2 * Math.PI; // Percentage of a full circle
         endAngle = startAngle + sliceAngle;
         this.slices.push(new Slice(slice.color, startAngle, endAngle));
         startAngle = endAngle;
@@ -63,9 +63,9 @@ PieChart.prototype.paint = function(color){
         this.context.strokeStyle = color;
         this.context.stroke();
     } else {
-        context.lineTo(0, 0);
-        context.fillStyle = color;
-        context.fill();
+        this.context.lineTo(0, 0);
+        this.context.fillStyle = color;
+        this.context.fill();
     }
 };
 

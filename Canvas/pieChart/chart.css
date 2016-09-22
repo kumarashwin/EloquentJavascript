@@ -1,0 +1,16 @@
+body {
+    padding: 20px;
+}
+
+.chart {
+    width: 300px;
+    padding: 10px;
+}
+
+.chart div {
+    padding: 0 15%;
+}
+
+/*canvas {
+    border: 1px solid black;
+}*/

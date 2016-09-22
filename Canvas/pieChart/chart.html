@@ -42,24 +42,24 @@
         //     }
         // });
 
-        //UNFOCUS
-        document.addEventListener("click", function(event){
-            var node = event.target;
-            while(true){
-                if(node == null){ // If our search has reached the element beyond the 'controls'
-                    if(dataModified){   // Redraw if there was a modification;
-                        redrawChart();
-                    }
-                    break;
-                }
-                else if(node != controls){ // This element isn't controls, but could be a child
-                    node = node.parentNode;
-                }
-                else {  
-                    break; // Aha! The target was within the controls element!
-                }
-            }
-        });
+//UNFOCUS: TAKE CARE OF THIS!!
+        // document.addEventListener("click", function(event){
+        //     var node = event.target;
+        //     while(true){
+        //         if(node == null){ // If our search has reached the element beyond the 'controls'
+        //             if(dataModified){   // Redraw if there was a modification;
+        //                 redrawChart();
+        //             }
+        //             break;
+        //         }
+        //         else if(node != controls){ // This element isn't controls, but could be a child
+        //             node = node.parentNode;
+        //         }
+        //         else {  
+        //             break; // Aha! The target was within the controls element!
+        //         }
+        //     }
+        // });
 
         // //KEYBOARD INPUT
         // controls.addEventListener("keydown", function(event){

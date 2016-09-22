@@ -47,14 +47,15 @@ Chart.prototype.createElement = function(){
 Chart.prototype.addFocusEvent = function(){
     this.element.addEventListener("click", function(event){
         if(event.target.nodeName == "INPUT"){
-            this.event.style.boxShadow = "0 0 20px lightblue";
+            this.element.style.boxShadow = "0 0 20px lightblue";
             this.dataModified = true;
             //Add tabIndexes, so we can tab through them
-            for(var i = 0; i < inputs.length; i++){
-                this.inputs[i].tabIndex = 0;
-            }
+            this.inputs.forEach(function(input){input.tabIndex = 0});
+            // for(var i = 0; i < inputs.length; i++){
+            //     this.inputs[i].tabIndex = 0;
+            // }
         }
-    });
+    }.bind(this));
 };
 
 //KEYBOARD INPUT
@@ -81,7 +82,7 @@ Chart.prototype.addKeyboardValidation = function () {
                 this.draw(event.key == "Enter"); // ONLY WAY TO SAVE INPUT!!
             }
         }
-    });
+    }.bind(this));
 };
 
 Chart.prototype.testFunction = function(choice){

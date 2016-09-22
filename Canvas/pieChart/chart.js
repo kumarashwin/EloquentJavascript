@@ -1,5 +1,5 @@
 function Chart(lastChartId, data){
-    this.chartId = lastChartId + 1;
+    this.id = lastChartId + 1;
     this.data = data;
     this.inputs = [];
     this.dataModified = false;
@@ -35,7 +35,7 @@ Chart.prototype.createElement = function(){
     }, this);
 
     var div = document.createElement("div");
-    div.setAttribute("id", this.chartId);
+    div.setAttribute("id", this.id);
     div.setAttribute("class", "chart");
     div.appendChild(inputs);
     div.appendChild(this.canvas);

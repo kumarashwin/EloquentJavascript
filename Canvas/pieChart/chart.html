@@ -8,27 +8,8 @@
     </body>
     <script type="text/javascript" src="pieChart.js"></script>
     <script type="text/javascript" src="chart.js"></script>
+    <script type="text/javascript" src="chartRepository.js"></script>
     <script type="text/javascript">
-
-        function ChartRepository(){
-            this.body = document.getElementsByTagName("body")[0]; 
-            this.charts = [];
-            this.defaultData = [
-                {title:"Yes", name: "yes", value: 1043, color: "lightblue"},
-                {title:"No", name: "no", value: 563, color: "lightgreen"},
-                {title:"Maybe", name: "maybe", value: 510, color: "pink"},
-                {title:"Not Sure", name: "not-sure", value: 175, color: "silver"}
-            ];
-            this.add();
-        }
-
-        ChartRepository.prototype.add = function(){
-            var chart = new Chart(this.charts.length, this.defaultData);
-            this.charts.push(chart);
-            this.body.appendChild(chart.element);
-            chart.draw();
-        }
-
         var chartRepo = new ChartRepository();
     </script>
 </html>

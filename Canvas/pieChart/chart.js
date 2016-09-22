@@ -7,7 +7,7 @@ function Chart(lastChartId, data){
     this.canvas = this.createCanvas();
     this.element = this.createElement();
     this.addFocusEvent();
-    this.addKeyboardValidation();
+    this.addKeydownEvent();
 }
 
 Chart.prototype.createCanvas = function(){
@@ -52,7 +52,8 @@ Chart.prototype.addFocusEvent = function(){
             this.inputs.forEach(function(input){input.tabIndex = 0});
             
             //Add 'click'-unfocus event on document:
-            document.addEventListener("click", this.unfocusEvent.bind(this));
+            this._unfocusEvent = this.unfocusEvent.bind(this);
+            document.addEventListener("click", this._unfocusEvent);
         }
     }.bind(this));
 };
@@ -65,7 +66,8 @@ Chart.prototype.unfocusEvent = function(event){
             if(this.dataModified){   // Check if there was a modification in any of the charts;
                 this.draw();         // Redraw if necessary
             }
-            document.removeEventListener("click", this.unfocusEvent.bind(this));
+            document.removeEventListener("click", this._unfocusEvent);
+            this._unfocusEvent = undefined;
             break;
         }
         else if(node == this.element){ // Aha! The target was within the active element! Do nothing.
@@ -78,30 +80,38 @@ Chart.prototype.unfocusEvent = function(event){
 };
 
 //KEYBOARD INPUT
-Chart.prototype.addKeyboardValidation = function () {
-    this.element.addEventListener("keydown", function (event) {
-        //Traverse through the inputs
-        if (event.key == "Tab") {
-            //Last element; Shift NOT pressed
-            if (!event.shiftKey && event.target == this.inputs[this.inputs.length - 1]) {
-                this.inputs[0].focus();
-                event.preventDefault();
-            }
-            //First element; Shift pressed
-            else if (event.shiftKey && event.target == this.inputs[0]) {
-                this.inputs[this.inputs.length - 1].focus();
-                event.preventDefault();
-            }
-            //Otherwise, default operation
+Chart.prototype.keydownHandler = function(event) {
+    //Traverse through the inputs
+    if (event.key == "Tab") {
+        //Last element; Shift NOT pressed
+        if (!event.shiftKey && event.target == this.inputs[this.inputs.length - 1]) {
+            this.inputs[0].focus();
+            event.preventDefault();
         }
-        else if (!/(\d|\.|Backspace|ArrowLeft|ArrowRight)/.test(event.key)) {
-            event.preventDefault(); //Only allow permitted input
-            if (event.key == "Enter" || event.key == "Escape") {
-                event.target.blur(); // Unfocus the input element
-                this.draw(event.key == "Enter"); // ONLY WAY TO SAVE INPUT!!
-            }
+        //First element; Shift pressed
+        else if (event.shiftKey && event.target == this.inputs[0]) {
+            this.inputs[this.inputs.length - 1].focus();
+            event.preventDefault();
         }
-    }.bind(this));
+        //Otherwise, default operation
+    }
+    else if (!/(\d|\.|Backspace|ArrowLeft|ArrowRight)/.test(event.key)) {
+        event.preventDefault(); //Only allow permitted input
+        if (event.key == "Enter" || event.key == "Escape") {
+            event.target.blur(); // Unfocus the input element 
+            this.draw(event.key == "Enter"); // ONLY WAY TO SAVE INPUT!!
+        }
+    }
+};
+
+Chart.prototype.addKeydownEvent = function () {
+    this._keydownHandler = this.keydownHandler.bind(this);
+    this.element.addEventListener("keydown", this._keydownHandler);
+};
+
+Chart.prototype.removeKeydownEvent = function(){
+    this.element.removeEventListener("keydown", this._keydownHandler);
+    this._keydownHandler = undefined;
 };
 
 Chart.prototype.draw = function (saveInput) {

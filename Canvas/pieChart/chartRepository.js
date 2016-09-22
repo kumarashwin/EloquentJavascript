@@ -26,9 +26,10 @@ ChartRepository.prototype.add = function(position) {
     chart.draw();
 };
 
-ChartRepository.prototype.remove = function(id){
-    //var chart = this.charts.find(function(chart){return chart.id == id;});
-    this.body.removeChild(document.getElementById(id).parentNode);
+ChartRepository.prototype.remove = function(chart){
+    chart.removeKeydownEvent();
+    this.charts.splice(chart.id - 1,1);
+    this.body.removeChild(chart.element.parentNode);
 };
 
 ChartRepository.prototype.createButtons = function (chart) {
@@ -54,7 +55,7 @@ ChartRepository.prototype.createButtons = function (chart) {
                     this.add(chart.element);
                     break;
                 case "remove":
-                    this.remove(chart.id);
+                    this.remove(chart);
                     break;
             }
         }

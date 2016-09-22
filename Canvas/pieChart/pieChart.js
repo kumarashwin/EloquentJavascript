@@ -69,43 +69,43 @@ PieChart.prototype.paint = function(color){
     }
 };
 
-PieChart.prototype.draw = function(_this){
-    _this.slices.forEach(function(slice, index){
+PieChart.prototype.draw = function(){
+    this.slices.forEach(function(slice, index){
         var interval = setInterval(function(){
             if (index == 0){                    // In a new chain,
-                if(_this.doneAnimation)         // if all elements are done animating,
-                    _this.dumpInterval = true;  // initiate dump of the interval
+                if(this.doneAnimation)         // if all elements are done animating,
+                    this.dumpInterval = true;  // initiate dump of the interval
                 else
-                    _this.clear();              // Otherwise, clear the canvas
+                    this.clear();              // Otherwise, clear the canvas
             }
 
-            if (_this.dumpInterval) {
+            if (this.dumpInterval) {
                 clearInterval(interval); // End animation for the slices
             }
             else {
                 slice.startAngle = Math.min(slice.startAngle, slice.beginning);
                 slice.endAngle = Math.min(slice.endAngle, slice.end);
 
-                _this.context.save();
-                _this.context.translate(_this.posX, _this.posY);
-                _this.context.beginPath();
-                _this.context.arc(0, 0, _this.size, slice.startAngle, slice.endAngle);
-                _this.paint(slice.color);
-                _this.context.restore();
+                this.context.save();
+                this.context.translate(this.posX, this.posY);
+                this.context.beginPath();
+                this.context.arc(0, 0, this.size, slice.startAngle, slice.endAngle);
+                this.paint(slice.color);
+                this.context.restore();
 
                 if (slice.endAngle == slice.end && slice.startAngle == slice.beginning){ // If animation complete,
                     if (index == 0)                                 // First element starts the verification chain
-                        _this.doneAnimation = true;
+                        this.doneAnimation = true;
                     else
-                        _this.doneAnimation = _this.doneAnimation && true; //All other following elements continue the verification
+                        this.doneAnimation = this.doneAnimation && true; //All other following elements continue the verification
                 }
                 else {                                      
-                    _this.doneAnimation = false;            // Otherwise, if one slice hasn't finished, 
+                    this.doneAnimation = false;            // Otherwise, if one slice hasn't finished, 
                     slice.startAngle += slice.step / 2;     // it sets the doneAnimation to 'false'
                     slice.endAngle += slice.step;           // and increases the relevant variables
                 }
             }
-        }, 30);
-    });
+        }.bind(this), 30);
+    }, this);
 };
 //========== END OF PIE DRAWING PART ========

@@ -1,5 +1,12 @@
 body {
     padding: 20px;
+    overflow-x: scroll;
+    white-space: nowrap;
+}
+
+.buttons {
+    display: inline-block;
+    width: 320px;
 }
 
 .chart {
@@ -10,7 +17,3 @@ body {
 .chart div {
     padding: 0 15%;
 }
-
-/*canvas {
-    border: 1px solid black;
-}*/

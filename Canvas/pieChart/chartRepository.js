@@ -18,7 +18,7 @@ ChartRepository.prototype.add = function(position) {
     buttons.appendChild(chart.element);
 
     if(position){
-        this.body.insertBefore(buttons, position.nextSibling);
+        this.body.insertBefore(buttons, position.parentNode.nextSibling);
     } else {
         this.body.appendChild(buttons);
     }

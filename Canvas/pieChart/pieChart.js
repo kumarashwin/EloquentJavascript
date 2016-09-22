@@ -8,6 +8,7 @@ function PieChart(context, data, radius, posX, posY, stroke, strokeWidth) {
     this.dumpInterval = false;
     this.posX = posX;
     this.posY = posY;
+    this.clear = this.clearFactory(radius, this.posX, this.posY);
     this.totalObservations = this.data.reduce(function (sum, choice) { return sum + choice.count; }, 0);
 
     this.size = radius;
@@ -22,7 +23,6 @@ function PieChart(context, data, radius, posX, posY, stroke, strokeWidth) {
         }
     }
 
-    this.clear = this.clearFactory(this.size, this.posX, this.posY);
     this.populateSlices();
     this.draw(this);
 }

@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     </head>
     <body style="padding: 20px;">
-        <div id="controls" style="width: 300px; padding: 10px; border: 0 solid black;">
+        <!--<div id="controls" style="width: 300px; padding: 10px; border: 0 solid black;">
                 <div style="padding: 0 15%;">
                     Yes: <input type="text" name="yes" value="1043"><br>
                     No: <input type="text" name="no" value="563"><br>
@@ -12,14 +12,26 @@
                     Not Sure: <input type="text" name="notSure" value="175">
                 </div>
             <canvas style="border: 0 solid black;" width="300" height="300"></canvas>
-        </div>
+        </div>-->
     </body>
     <script type="text/javascript" src="pieChart.js"></script>
+    <script type="text/javascript" src="chart.js"></script>
     <script type="text/javascript">
 
+        //TEMPORARY:
+        var data = [
+            {name: "Yes", value: 1043},
+            {name: "No", value: 563},
+            {name: "Maybe", value: 510},
+            {name: "Not Sure", value: 175}
+        ];
+        var chartCounter = 0;
+        var chart = new Chart(chartCounter, data);
+        document.getElementsByTagName("body")[0].appendChild(chart.element);
+        
+        var controls = document.getElementById("1");
         var context = document.querySelector("canvas").getContext("2d");
         var inputs = document.querySelectorAll("input");
-        var controls = document.getElementById("controls");
         var dataModified = false;
 
         //FOCUS
@@ -108,7 +120,7 @@
             yes:{count: 1043, color: "lightblue"},
             no:{count: 563, color: "lightgreen"},
             maybe:{count: 510, color: "pink"},
-            notSure:{count: 175, color: "silver"}
+            "not-sure":{count: 175, color: "silver"}
         };
 
         redrawChart();    //Initial draw

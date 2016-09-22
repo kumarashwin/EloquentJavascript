@@ -24,7 +24,6 @@ Chart.prototype.createElement = function(){
     this.data.forEach(function(observation, index){
         var input = document.createElement("input");
         input.setAttribute("type", "text");
-        //input.setAttribute("name", observation.name.toLowerCase().replace(/ /g,"-"));
         input.setAttribute("name", observation.name);
         input.setAttribute("value", observation.value);
         this.inputs.push(input);
@@ -51,11 +50,31 @@ Chart.prototype.addFocusEvent = function(){
             this.dataModified = true;
             //Add tabIndexes, so we can tab through them
             this.inputs.forEach(function(input){input.tabIndex = 0});
-            // for(var i = 0; i < inputs.length; i++){
-            //     this.inputs[i].tabIndex = 0;
-            // }
+            
+            //Add 'click'-unfocus event on document:
+            document.addEventListener("click", this.unfocusEvent.bind(this));
         }
     }.bind(this));
+};
+
+//UNFOCUS
+Chart.prototype.unfocusEvent = function(event){
+    var node = event.target;
+    while(true){
+        if(node == null){            // If our search has reached the parent elements beyond the 'chart';
+            if(this.dataModified){   // Check if there was a modification in any of the charts;
+                this.draw();         // Redraw if necessary
+            }
+            document.removeEventListener("click", this.unfocusEvent.bind(this));
+            break;
+        }
+        else if(node == this.element){ // Aha! The target was within the active element! Do nothing.
+            break;
+        }
+        else {                         // This node isn't the active element, but could be a child.
+            node = node.parentNode;
+        }
+    }
 };
 
 //KEYBOARD INPUT
@@ -85,18 +104,10 @@ Chart.prototype.addKeyboardValidation = function () {
     }.bind(this));
 };
 
-Chart.prototype.testFunction = function(choice){
-    var name = this.getAttribute("name");
-    var result = choice.name == this.getAttribute("name");
-    return result;
-};
-
 Chart.prototype.draw = function (saveInput) {
     this.inputs.forEach(function(input){
         input.tabIndex = -1; //Clear tabIndexes!
-        //var name = input.getAttribute("name");
         var field = this.data.find(function(choice){return choice.name == this.getAttribute("name");}, input);
-        //var field = this.data.find(this.testFunction, input);
         if (saveInput){ // Save, if true
             field.value = parseInt(input.value);
         }
@@ -105,5 +116,5 @@ Chart.prototype.draw = function (saveInput) {
     }, this);
     this.element.style.boxShadow = "";
     this.dataModified = false;
-    return new PieChart(this.canvas.getContext("2d"), this.data, 100, 150, 150);//, true, 28);
+    new PieChart(this.canvas.getContext("2d"), this.data, 100, 150, 150);//, true, 28);
 };

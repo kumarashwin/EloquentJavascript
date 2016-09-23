@@ -1,6 +1,5 @@
 function ChartRepository() {
-    this.body = document.getElementsByTagName("body")[0];
-    this.charts = [];
+    // Use this to change default values
     this.defaultData = [
         { title: "Yes", name: "yes", value: 1043, color: "lightblue" },
         { title: "No", name: "no", value: 563, color: "lightgreen" },
@@ -8,17 +7,32 @@ function ChartRepository() {
         { title: "Not Sure", name: "not-sure", value: 175, color: "silver" }
     ];
 
+    this.body = document.getElementsByTagName("body")[0];
+    this.charts = [];
     this.add();
 }
 
+// 'data' is an array of objects; like 'this.defaultData'
+ChartRepository.prototype.deepCopy = function(data){
+    return data.map(function(object){
+        var newObject = {};
+        for(var property in object){
+            if(object.hasOwnProperty(property)){
+                newObject[property] = object[property];
+            }
+        }
+        return newObject;
+    });
+};
+
 ChartRepository.prototype.add = function(position) {
-    var chart = new Chart(this.charts.length, this.defaultData);
+    var chart = new Chart(this.charts.length, this.deepCopy(this.defaultData)); // Creating a copy of the default data with deepCopy;
     this.charts.push(chart);
     var buttons = this.createButtons(chart);
     buttons.appendChild(chart.element);
 
     if(position){
-        this.body.insertBefore(buttons, position.parentNode.nextSibling);
+        this.body.insertBefore(buttons, position.parentNode.nextSibling); // Find the parent 'buttons' around the div, and add after
     } else {
         this.body.appendChild(buttons);
     }
@@ -52,7 +66,7 @@ ChartRepository.prototype.createButtons = function (chart) {
         if(event.target.nodeName == "BUTTON"){
             switch(event.target.name){
                 case "add":
-                    this.add(chart.element);
+                    this.add(chart.element); //Pass the div element after which the new div should be added
                     break;
                 case "remove":
                     this.remove(chart);

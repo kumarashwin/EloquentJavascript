@@ -1,16 +1,35 @@
 function ChartRepository() {
     // Use this to change default values
     this.defaultData = [
-        { title: "Yes", name: "yes", value: 1043, color: "lightblue" },
-        { title: "No", name: "no", value: 563, color: "lightgreen" },
-        { title: "Maybe", name: "maybe", value: 510, color: "pink" },
-        { title: "Not Sure", name: "not-sure", value: 175, color: "silver" }
+        { title: "Yes", name: "yes", value: 100, color: "lightblue" },
+        { title: "No", name: "no", value: 100, color: "lightgreen" },
+        { title: "Maybe", name: "maybe", value: 100, color: "pink" },
+        { title: "Not Sure", name: "not-sure", value: 100, color: "silver" }
     ];
 
     this.body = document.getElementsByTagName("body")[0];
     this.charts = [];
     this.add();
 }
+
+ChartRepository.prototype.proportionalize = function(){
+    var max = this.charts.reduce(function(max, chart){return Math.max(max, chart.totalObservations);},0);
+    this.charts.forEach(function(chart){
+        chart.draw((chart.totalObservations/max) * 100); // Max size will thus always be 100;
+    });
+};
+
+ChartRepository.prototype.addProportionalizeControls = function(){
+    var proportionalize = document.createElement("button");
+    proportionalize.setAttribute("name", "proportionalize");
+    proportionalize.appendChild(document.createTextNode("Proportionalize"));
+
+    proportionalize.addEventListener("click", function(){
+        this.proportionalize();
+    }.bind(this));
+
+    this.body.appendChild(proportionalize);
+};
 
 // 'data' is an array of objects; like 'this.defaultData'
 ChartRepository.prototype.deepCopy = function(data){
@@ -37,6 +56,8 @@ ChartRepository.prototype.add = function(position) {
 
     if(position){
         this.body.insertBefore(buttons, position.parentNode.nextSibling); // Find the parent 'buttons' around the div, and add after
+        if(this.charts.length == 2)
+            this.addProportionalizeControls(); // Add only if there are atleast two charts
     } else {
         this.body.appendChild(buttons);
         startLeft = endLeft; // If first element, don't animate 'position'
@@ -72,6 +93,11 @@ ChartRepository.prototype.remove = function(chart){
             chart.removeKeydownEvent();
             this.charts.splice(chart.id - 1,1);
             this.body.removeChild(buttons);
+
+            if(this.charts.length < 2){ // If less than 2 charts, remove proportionalize
+                this.body.removeChild(document.querySelector("button[name=proportionalize]"));
+            }
+                
         }
     }.bind(this), 30);
 };

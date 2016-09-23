@@ -1,19 +1,20 @@
 
 //====== PIE CHART =====================
-function PieChart(context, data, radius, posX, posY, stroke, strokeWidth) {
-    this.context = context;
+function PieChart(canvas, data, totalObservations, radius, stroke) {
+    this.context = canvas.getContext('2d');
+    this.clear = function(){this.context.clearRect(0, 0, canvas.width, canvas.height);};
     this.data = data;
+    this.totalObservations = totalObservations;
     this.slices = [];
     this.doneAnimation = false;
     this.dumpInterval = false;
-    this.posX = posX;
-    this.posY = posY;
-    this.clear = this.clearFactory(radius, this.posX, this.posY);
-    this.totalObservations = this.data.reduce(function (sum, choice) { return sum + choice.value; }, 0);
-
+    this.posX = canvas.width/2;
+    this.posY = canvas.height/2;
+    //this.clear = this.clearFactory(radius, this.posX, this.posY);
     this.size = radius;
+    
     if(stroke === true){                    // Determine if style is hollow i.e. we use strokes
-        this.stroke = stroke;               // If strokeWidth provided
+        this.stroke = stroke;
         this.strokeWidth = radius * 0.4;
         this.size = radius - (this.strokeWidth/2);
     }
@@ -30,6 +31,10 @@ function Slice(color, beginning, end){
     //For step-by-step animation:
     this.startAngle = this.endAngle = this.beginning - (2*Math.PI/12); // beginning - 30 degrees
     this.step = Math.max(0.1, (this.end - this.beginning) * 0.1); // From 0.1 upto 1% of slice's angle
+}
+
+PieChart.prototype.clear = function(){
+    
 }
 
 //AWW YEAH, using closures!

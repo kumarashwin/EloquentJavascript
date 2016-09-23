@@ -26,25 +26,25 @@ ChartRepository.prototype.deepCopy = function(data){
 };
 
 ChartRepository.prototype.add = function(position) {
-    var chart = new Chart(this.charts.length, this.deepCopy(this.defaultData)); // Creating a copy of the default data with deepCopy;
-    this.charts.push(chart);
+    var chart = new Chart(this.charts.length, this.deepCopy(this.defaultData)); // Creating a copy of the default data with deepCopy;    
     var buttons = this.createButtons(chart);
+    var endLeft = /\d+/.exec(buttons.style.left);
+    var startLeft = endLeft - 10;
+    var opacity = 0;
+
+    this.charts.push(chart);
     buttons.appendChild(chart.element);
 
     if(position){
         this.body.insertBefore(buttons, position.parentNode.nextSibling); // Find the parent 'buttons' around the div, and add after
     } else {
         this.body.appendChild(buttons);
+        startLeft = endLeft; // If first element, don't animate 'position'
     }
     
-    buttons.style.opacity = 0;
+    buttons.style.opacity = opacity;
     buttons.style.position = "relative";
-    var opacity = 0;
-
-    var endLeft = /\d+/.exec(buttons.style.left);
-    var startLeft = endLeft - 10;
     buttons.style.left = startLeft + "px";
-    
     var interval = setInterval(function(){
         startLeft = Math.min(endLeft, startLeft);
         opacity = Math.min(1, opacity); 

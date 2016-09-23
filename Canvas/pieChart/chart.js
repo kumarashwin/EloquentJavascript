@@ -28,7 +28,7 @@ Chart.prototype.createElement = function(){
         input.setAttribute("value", observation.value);
         this.inputs.push(input);
         
-        var textNode = document.createTextNode(observation.name + ": ");
+        var textNode = document.createTextNode(observation.title + ": ");
         inputs.appendChild(textNode);
         inputs.appendChild(input);
         inputs.appendChild(document.createElement("br"));
@@ -126,5 +126,5 @@ Chart.prototype.draw = function (saveInput) {
     }, this);
     this.element.style.boxShadow = "";
     this.dataModified = false;
-    new PieChart(this.canvas.getContext("2d"), this.data, 100, 150, 150);//, true, 28);
+    new PieChart(this.canvas.getContext("2d"), this.data, 100, 150, 150, true, 33);
 };

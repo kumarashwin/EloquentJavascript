@@ -34,7 +34,7 @@ function Slice(color, beginning, end){
 
     //For step-by-step animation:
     this.startAngle = this.endAngle = this.beginning - (2*Math.PI/12); // beginning - 30 degrees
-    this.step = Math.max(0.05, (this.end - this.beginning) * 0.05); // Minimum 0.05 upto 5% of slice's angle
+    this.step = Math.max(0.1, (this.end - this.beginning) * 0.1); // From 0.1 upto 1% of slice's angle
 }
 
 //AWW YEAH, using closures!

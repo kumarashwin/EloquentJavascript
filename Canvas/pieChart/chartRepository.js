@@ -37,13 +37,43 @@ ChartRepository.prototype.add = function(position) {
         this.body.appendChild(buttons);
     }
     
+    buttons.style.opacity = 0;
+    buttons.style.position = "relative";
+    var opacity = 0;
+
+    var endLeft = /\d+/.exec(buttons.style.left);
+    var startLeft = endLeft - 10;
+    buttons.style.left = startLeft + "px";
+    
+    var interval = setInterval(function(){
+        startLeft = Math.min(endLeft, startLeft);
+        opacity = Math.min(1, opacity); 
+
+        buttons.style.left = startLeft + "px";
+        buttons.style.opacity = opacity;
+
+        if(opacity >= 1.0 && startLeft >= endLeft)
+            clearInterval(interval);
+        else{
+            opacity += 0.1;
+            startLeft += 1;
+        }
+    }, 30);
     chart.draw();
 };
 
 ChartRepository.prototype.remove = function(chart){
-    chart.removeKeydownEvent();
-    this.charts.splice(chart.id - 1,1);
-    this.body.removeChild(chart.element.parentNode);
+    var buttons = chart.element.parentNode;
+    var opacity = 1.0;
+    var opacityInterval = setInterval(function(){
+        buttons.style.opacity = opacity -= 0.05;
+        if(opacity <= 0){
+            clearInterval(opacityInterval);
+            chart.removeKeydownEvent();
+            this.charts.splice(chart.id - 1,1);
+            this.body.removeChild(buttons);
+        }
+    }.bind(this), 30);
 };
 
 ChartRepository.prototype.createButtons = function (chart) {
@@ -74,10 +104,6 @@ ChartRepository.prototype.createButtons = function (chart) {
             }
         }
     }.bind(this));
-
-    // var chartWithButtons = document.createElement("div");
-    // chartWithButtons.setAttribute("class", "chart-with-buttons");
-    // chartWithButtons.appendChild(buttons);
 
     return buttons;
 };

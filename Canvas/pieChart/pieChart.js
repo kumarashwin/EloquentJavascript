@@ -14,13 +14,8 @@ function PieChart(context, data, radius, posX, posY, stroke, strokeWidth) {
     this.size = radius;
     if(stroke === true){                    // Determine if style is hollow i.e. we use strokes
         this.stroke = stroke;               // If strokeWidth provided
-        if(strokeWidth) {
-            this.strokeWidth = strokeWidth; // If yes;
-            this.size = radius - ( Math.max(strokeWidth, 40) / 2); // Reduce size by outer half of stroke
-        } else {
-            this.strokeWidth = 40; // If not;
-            this.size = radius - 20; // Reduce size by half of minimum stroke width i.e. 40 / 2
-        }
+        this.strokeWidth = radius * 0.4;
+        this.size = radius - (this.strokeWidth/2);
     }
 
     this.populateSlices();

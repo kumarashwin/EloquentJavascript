@@ -2,7 +2,8 @@ function Chart(lastChartId, data){
     this.id = lastChartId + 1;
     this.data = data;
     this.inputs = [];
-    this.dataModified = false;
+    this.focused = false;
+    this.size = 100;
 
     this.canvas = this.createCanvas();
     this.element = this.createElement();
@@ -46,8 +47,9 @@ Chart.prototype.createElement = function(){
 Chart.prototype.addFocusEvent = function(){
     this.element.addEventListener("click", function(event){
         if(event.target.nodeName == "INPUT"){
+            this.focused = true;
             this.element.style.boxShadow = "0 0 20px lightblue";
-            this.dataModified = true;
+
             //Add tabIndexes, so we can tab through them
             this.inputs.forEach(function(input){input.tabIndex = 0});
             
@@ -63,7 +65,7 @@ Chart.prototype.unfocusEvent = function(event){
     var node = event.target;
     while(true){
         if(node == null){            // If our search has reached the parent elements beyond the 'chart';
-            if(this.dataModified){   // Check if there was a modification in any of the charts;
+            if(this.focused){   // Check if there was a modification in any of the charts;
                 this.draw();         // Redraw if necessary
             }
             document.removeEventListener("click", this._unfocusEvent);
@@ -115,16 +117,25 @@ Chart.prototype.removeKeydownEvent = function(){
 };
 
 Chart.prototype.draw = function (saveInput) {
-    this.inputs.forEach(function(input){
-        input.tabIndex = -1; //Clear tabIndexes!
-        var field = this.data.find(function(choice){return choice.name == this.getAttribute("name");}, input);
-        if (saveInput){ // Save, if true
-            field.value = parseInt(input.value);
-        }
-        else //Default: Reset values
-            input.value = field.value;
-    }, this);
-    this.element.style.boxShadow = "";
-    this.dataModified = false;
-    new PieChart(this.canvas.getContext("2d"), this.data, 100, 150, 150, true, 33);
+    if(this.focused){
+        this.focused = false;
+        this.element.style.boxShadow = "";
+
+        this.inputs.forEach(function(input){
+            input.tabIndex = -1; //Clear tabIndexes!
+            var field = this.data.find(function(choice){return choice.name == this.getAttribute("name");}, input);
+            if (saveInput){ // Save, if true
+                field.value = parseInt(input.value);
+            }
+            else //Default: Reset values
+                input.value = field.value;
+        }, this);
+    }
+    
+    new PieChart(this.canvas.getContext("2d"),
+                 this.data,
+                 this.size,
+                 this.canvas.width/2,
+                 this.canvas.height/2,
+                 true);
 };

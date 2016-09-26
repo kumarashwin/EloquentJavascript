@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+    <body>
+        <canvas style="border: 1px solid black; background-color: green; " width="500" height="300"></canvas>
+    </body>
+    <script type="text/javascript">
+        //VECTOR
+        function Vector(x, y){
+            this.x = x;
+            this.y = y;
+        }
+
+        Vector.prototype.plus = function(other){
+            return new Vector(this.x + other.x,
+                            this.y + other.y);
+        };
+
+        Vector.prototype.times = function(factor){
+            return new Vector(this.x * factor,
+                            this.y * factor);
+        };
+
+        function Ball(canvas, startVector, radius){
+            this.canvas = canvas;
+            this.context = this.canvas.getContext("2d");
+            this.radius = radius;
+            this.currentVector = startVector;
+
+            this.draw();
+        }
+
+        Ball.prototype.getBoundingRect = function(){
+            return {topLeft: {
+                        x: this.currentVector.x - this.radius,
+                        y: this.currentVector.y - this.radius},
+                    topRight: {
+                        x: this.currentVector.x + this.radius,
+                        y: this.currentVector.y - this.radius},
+                    bottomLeft: {
+                        x: this.currentVector.x - this.radius,
+                        y: this.currentVector.y + this.radius},
+                    bottomRight: {
+                        x: this.currentVector.x + this.radius,
+                        y: this.currentVector.y + this.radius}};
+        };
+
+        Ball.prototype.findNextPosition = function(){
+            var boundingRect = this.getBoundingRect();
+        };
+
+        Ball.prototype.draw = function(){
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            // this.context.restore();
+            // this.context.save();
+            // this.context.translate(this.x, this.y);
+            this.context.beginPath();
+            this.context.arc(this.currentVector.x, this.currentVector.y, this.radius, 0, 2 * Math.PI);
+            this.context.fillStyle = "red";
+            this.context.fill();
+        };
+        
+        new Ball(document.getElementsByTagName("canvas")[0], new Vector(225, 150), 100);
+
+    </script>
+</html>

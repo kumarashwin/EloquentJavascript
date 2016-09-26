@@ -23,46 +23,54 @@
                             this.y * factor);
         };
 
-        function Ball(canvas, startVector, radius){
+        function Ball(canvas, startPosition, startDirection, radius){
             this.canvas = canvas;
             this.context = this.canvas.getContext("2d");
             this.radius = radius;
-            this.currentVector = startVector;
+            this.currentPosition = startPosition;
+            
+            if(startDirection){
+                this.currentDirection = startDirection;
+            } else {
+                this.currentDirection = new Vector(-3,3);
+            }
 
             this.draw();
+            requestAnimationFrame(this.animate.bind(this));
         }
 
-        Ball.prototype.getBoundingRect = function(){
-            return {topLeft: {
-                        x: this.currentVector.x - this.radius,
-                        y: this.currentVector.y - this.radius},
-                    topRight: {
-                        x: this.currentVector.x + this.radius,
-                        y: this.currentVector.y - this.radius},
-                    bottomLeft: {
-                        x: this.currentVector.x - this.radius,
-                        y: this.currentVector.y + this.radius},
-                    bottomRight: {
-                        x: this.currentVector.x + this.radius,
-                        y: this.currentVector.y + this.radius}};
+        Ball.prototype.animate = function(){
+            var nextPosition = this.currentPosition.plus(this.currentDirection);
+            this.checkForCollision(nextPosition);
+            this.currentPosition = this.currentPosition.plus(this.currentDirection);
+            this.draw();
+            requestAnimationFrame(this.animate.bind(this));
         };
 
-        Ball.prototype.findNextPosition = function(){
-            var boundingRect = this.getBoundingRect();
+        Ball.prototype.checkForCollision = function(nextPosition){
+            var boundingRect = this.getBoundingRect(nextPosition);
+            if(boundingRect.top <= 0 || boundingRect.bottom >= this.canvas.height)
+                this.currentDirection.y *= -1;
+            if(boundingRect.right >= this.canvas.width || boundingRect.left <= 0)
+                this.currentDirection.x *= -1;
+        };
+
+        Ball.prototype.getBoundingRect = function(nextPosition){
+            return {top: nextPosition.y - this.radius,
+                    right: nextPosition.x + this.radius,
+                    left: nextPosition.x - this.radius, 
+                    bottom: nextPosition.y + this.radius};
         };
 
         Ball.prototype.draw = function(){
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            // this.context.restore();
-            // this.context.save();
-            // this.context.translate(this.x, this.y);
             this.context.beginPath();
-            this.context.arc(this.currentVector.x, this.currentVector.y, this.radius, 0, 2 * Math.PI);
+            this.context.arc(this.currentPosition.x, this.currentPosition.y, this.radius, 0, 2 * Math.PI);
             this.context.fillStyle = "red";
             this.context.fill();
         };
         
-        new Ball(document.getElementsByTagName("canvas")[0], new Vector(225, 150), 100);
+        new Ball(document.getElementsByTagName("canvas")[0], new Vector(225, 150), false, 100);
 
     </script>
 </html>

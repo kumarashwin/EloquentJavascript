@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    </head>
+
+    <body>
+        <input type="text" id="field">
+        <div id="suggestions" style="cursor: pointer"></div>
+    </body>
+    <script>
+        // Builds up an array with global variable names, like
+        // 'alert', 'document', and 'scrollTo'
+        var terms = [];
+        for (var name in window)
+            terms.push(name);
+
+        var textField = document.getElementById("field");
+        var suggestionBox = document.getElementById("suggestions");
+        
+        textField.addEventListener("input", function(event){
+            var list = terms.filter(function(word){
+                return new RegExp("^" + textField.value).test(word);
+            });
+            while(suggestionBox.firstChild)
+                suggestionBox.removeChild(suggestionBox.firstChild);
+            suggestionBox.appendChild(document.createTextNode(list));
+        });
+    </script>
+</html>
+
+

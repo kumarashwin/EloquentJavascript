@@ -1,9 +1,9 @@
-function GameOfLife(div, size){
+function GameOfLife(div, size, clear){
     this.gridDiv = div;
     this.grid = [];
     this.size = size ? size : 5;
     this.generateCheckboxes();
-    this.intialRandom();
+    if(!clear) this.intialRandom();
 }
 
 GameOfLife.prototype.createCheckbox = function(){
@@ -90,14 +90,40 @@ GameOfLife.prototype.checkAllDirections = function(x, y){
 };
 
 //Main
-var gameOfLife = new GameOfLife(document.getElementById("grid"), 30);
+var size = document.getElementById("size");
+var grid = document.getElementById("grid");
 var button = document.getElementById("next");
-button.addEventListener("click", animate);
+var clear = document.getElementById("clear");
+var randomize = document.getElementById("randomize");
+var gameOfLife = new GameOfLife(grid, size.value);
 
-function animate(event){
-    requestAnimationFrame(function(){
-        var toChange = gameOfLife.checkAllCells();
-        gameOfLife.implementChanges(toChange);   
-    });
-    requestAnimationFrame(animate);
+var interval;
+button.addEventListener("click", function(){
+    interval = setInterval(function(){
+        toChange = gameOfLife.checkAllCells();
+        if (toChange.length == 0) // Life has reached a stable state
+            clearInterval(interval);
+        else
+            gameOfLife.implementChanges(toChange);   
+    }, 150);
+});
+
+function reDraw(clear){
+    if(interval)
+        clearInterval(interval);
+    while(grid.firstChild)
+        grid.removeChild(grid.firstChild);
+    gameOfLife = new GameOfLife(grid, size.value, clear);
 }
+
+size.addEventListener("change", function(){
+    reDraw();
+});
+
+clear.addEventListener("click", function(){
+    reDraw(true);
+})
+
+randomize.addEventListener("click", function(){
+    reDraw();
+});

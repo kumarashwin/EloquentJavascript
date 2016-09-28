@@ -1,7 +1,8 @@
-function GameOfLife(div, size, clear){
+function GameOfLife(div, width, height, clear){
     this.gridDiv = div;
     this.grid = [];
-    this.size = size ? size : 5;
+    this.width = width ? width : 5;
+    this.height = height ? height : 5;
     this.generateCheckboxes();
     if(!clear) this.intialRandom();
 }
@@ -14,9 +15,9 @@ GameOfLife.prototype.createCheckbox = function(){
 };
 
 GameOfLife.prototype.generateCheckboxes = function(){
-    for(var y = 0; y < this.size; y++){
+    for(var y = 0; y < this.height; y++){
         var row = [];
-        for(var x = 0; x < this.size; x++){
+        for(var x = 0; x < this.width; x++){
             var checkbox = this.createCheckbox();
             row.push(checkbox);
             this.gridDiv.appendChild(checkbox);
@@ -79,8 +80,8 @@ GameOfLife.prototype.checkAllDirections = function(x, y){
             if(_x || _y){                       // If both _x and _y are 0, the following isn't run
                 var Y = y + _y;
                 var X = x + _x;
-                if(-1 < X && X < this.size
-                && -1 < Y && Y < this.size){
+                if(-1 < X && X < this.width
+                && -1 < Y && Y < this.height){
                     if(this.grid[Y][X].checked) numberOfLiveCells++;
                 }
             }
@@ -90,12 +91,13 @@ GameOfLife.prototype.checkAllDirections = function(x, y){
 };
 
 //Main
-var size = document.getElementById("size");
+var width = document.getElementById("width");
+var height = document.getElementById("height");
 var grid = document.getElementById("grid");
 var button = document.getElementById("next");
 var clear = document.getElementById("clear");
 var randomize = document.getElementById("randomize");
-var gameOfLife = new GameOfLife(grid, size.value);
+var gameOfLife = new GameOfLife(grid, width.value, height.value);
 
 var interval;
 button.addEventListener("click", function(){
@@ -108,22 +110,17 @@ button.addEventListener("click", function(){
     }, 150);
 });
 
-function reDraw(clear){
-    if(interval)
-        clearInterval(interval);
-    while(grid.firstChild)
-        grid.removeChild(grid.firstChild);
-    gameOfLife = new GameOfLife(grid, size.value, clear);
-}
+function reDrawHandler(clear){
+    return function(event){
+        if(interval)
+            clearInterval(interval);
+        while(grid.firstChild)
+            grid.removeChild(grid.firstChild);
+        gameOfLife = new GameOfLife(grid, width.value, height.value, clear);
+    };
+};
 
-size.addEventListener("change", function(){
-    reDraw();
-});
-
-clear.addEventListener("click", function(){
-    reDraw(true);
-})
-
-randomize.addEventListener("click", function(){
-    reDraw();
-});
+width.addEventListener("change", reDrawHandler());
+height.addEventListener("change", reDrawHandler());
+clear.addEventListener("click", reDrawHandler(true));
+randomize.addEventListener("click", reDrawHandler());

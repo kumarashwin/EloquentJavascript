@@ -103,6 +103,17 @@ tools.Line = function(event, cx, onEnd){
     }, onEnd);
 };
 
+tools.Rectangle = function(event, cx){
+    var pos = relativePos(event, cx.canvas);
+    trackDrag(
+        function(event){},
+        function(event){
+            var endPos = relativePos(event, cx.canvas);
+            cx.fillRect(pos.x, pos.y, endPos.x - pos.x, endPos.y - pos.y);
+        }
+    );
+};
+
 tools.Erase = function(event, cx){
     cx.globalCompositeOperation = "destination-out";
     tools.Line(event, cx, function(){

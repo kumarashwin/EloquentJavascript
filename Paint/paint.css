@@ -10,4 +10,12 @@
   position: relative;
 }
 .picturepanel canvas { display: block; }
+
+.picturepanel .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid black;
+}
+
 .toolbar > * { margin-right: 5px; }

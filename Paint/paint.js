@@ -105,11 +105,23 @@ tools.Line = function(event, cx, onEnd){
 
 tools.Rectangle = function(event, cx){
     var pos = relativePos(event, cx.canvas);
+
+    var overlayDiv = elt("div", {class:"overlay"});
+    overlayDiv.style.borderColor = cx.fillStyle;
+    document.getElementsByClassName("picturepanel")[0].appendChild(overlayDiv);
+
+    var lastPos;
     trackDrag(
-        function(event){},
         function(event){
-            var endPos = relativePos(event, cx.canvas);
-            cx.fillRect(pos.x, pos.y, endPos.x - pos.x, endPos.y - pos.y);
+            lastPos = relativePos(event, cx.canvas);
+            overlayDiv.style.top = Math.min(lastPos.y, pos.y) + "px";
+            overlayDiv.style.left = Math.min(lastPos.x, pos.x) + "px";
+            overlayDiv.style.width = Math.abs(lastPos.x - pos.x) + "px";
+            overlayDiv.style.height = Math.abs(lastPos.y - pos.y) + "px";            
+        },
+        function(event){
+            cx.fillRect(pos.x, pos.y, lastPos.x - pos.x, lastPos.y - pos.y);
+            overlayDiv.parentNode.removeChild(overlayDiv);
         }
     );
 };

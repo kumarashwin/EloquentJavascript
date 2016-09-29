@@ -62,7 +62,7 @@ controls.tool = function(cx){
         select.appendChild(elt("option", null, name));
     
     cx.canvas.addEventListener("mousedown", function(event){
-        if(event.button == 1){
+        if(event.buttons == 1){
             tools[select.value](event, cx);
             event.preventDefault();
         }
@@ -212,7 +212,7 @@ function loadImageURL(cx, url){
 controls.openFile = function(cx){
     var input = elt("input", {type: "file"});
     input.addEventListener("change", function(){
-        if(!input.files.length){
+        if(input.files.length){
             var reader = new FileReader();
             reader.addEventListener("load", function(){
                 loadImageURL(cx, reader.result);

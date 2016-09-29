@@ -114,10 +114,18 @@ tools.Rectangle = function(event, cx){
     trackDrag(
         function(event){
             lastPos = relativePos(event, cx.canvas);
-            overlayDiv.style.top = Math.min(lastPos.y, pos.y) + "px";
+
+            if(lastPos.x < 0) lastPos.x = 0;
+            if(lastPos.y < 0) lastPos.y = 0;
+
+            if(lastPos.x > cx.canvas.width - 2) lastPos.x = cx.canvas.width - 2;
+            if(lastPos.y > cx.canvas.height - 2) lastPos.y = cx.canvas.height - 2; 
+
+            overlayDiv.style.top =  Math.min(lastPos.y, pos.y) + "px";
+            overlayDiv.style.height = Math.abs(lastPos.y - pos.y) + "px";
+
             overlayDiv.style.left = Math.min(lastPos.x, pos.x) + "px";
-            overlayDiv.style.width = Math.abs(lastPos.x - pos.x) + "px";
-            overlayDiv.style.height = Math.abs(lastPos.y - pos.y) + "px";            
+            overlayDiv.style.width = Math.abs(lastPos.x - pos.x) + "px"; 
         },
         function(event){
             cx.fillRect(pos.x, pos.y, lastPos.x - pos.x, lastPos.y - pos.y);

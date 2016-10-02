@@ -206,8 +206,7 @@ tools["Color picker"] = function(event, cx){
     var pos = relativePos(event, cx.canvas);
     var pixel = cx.getImageData(pos.x, pos.y, 1, 1);
 
-    cx.fillStyle = cx.strokeStyle =  "rgb(" + pixel.data[0] + "," + pixel.data[1] + "," + pixel.data[2] + ")";
-    document.querySelector("input[type=color]").value = rgb2hex(pixel.data);
+    document.querySelector("input[type=color]").value = cx.fillStyle = cx.strokeStyle = pixel.data[3] ? rgb2hex(pixel.data) : "#ffffff";
 };
 
 controls.color = function(cx){

@@ -58,8 +58,16 @@ var tools = Object.create(null);
  */
 controls.tool = function(cx){
     var select = elt("select");
-    for(var name in tools)
+    for(var name in tools){
         select.appendChild(elt("option", null, name));
+    }
+        
+    select.onchange = function(event){
+        if(event.target.value == "Color picker")
+            cx.canvas.style.cursor = "url(http://spritedatabase.net/downloads/SpriteTracer/images/drop.gif) 0 15, pointer";
+        else
+            cx.canvas.style.cursor = "auto";
+    };
     
     cx.canvas.addEventListener("mousedown", function(event){
         if(event.buttons == 1){
@@ -182,6 +190,24 @@ tools.Spray = function(event, cx){
         function(event){currentPos = relativePos(event, cx.canvas);},
         function(){clearInterval(spray);}
     );
+};
+
+function rgb2hex(rgb){
+    var hex = "#";
+    var curr;
+    for (var i = 0; i < 3; i++){
+        curr = rgb[i].toString(16);
+        hex += curr.length > 1 ? curr : "0" + curr; 
+    }
+    return hex;
+}
+
+tools["Color picker"] = function(event, cx){
+    var pos = relativePos(event, cx.canvas);
+    var pixel = cx.getImageData(pos.x, pos.y, 1, 1);
+
+    cx.fillStyle = cx.strokeStyle =  "rgb(" + pixel.data[0] + "," + pixel.data[1] + "," + pixel.data[2] + ")";
+    document.querySelector("input[type=color]").value = rgb2hex(pixel.data);
 };
 
 controls.color = function(cx){

@@ -60,8 +60,9 @@ function respondErrorOrNothing(respond){
     return function(error){
         if(error)
             respond(500, error.toString());
-        else
+        else{
             respond(204);
+        }
     };
 }
 
@@ -72,4 +73,23 @@ methods.PUT = function(path, respond, request){
     outStream.on("finish", function(){respond(204);});
 
     request.pipe(outStream);
+};
+
+methods.MKCOL = function(path, respond, request){
+    fs.stat(path, function(error, stats){
+        if(error && error.code == "ENOENT"){
+            var path = require("url").parse(request.url).pathname;
+            path = path.toString().split("/");
+            if(/[#<>%$\+\-!`&*'|{}?/:\\\s@"=]+/.test(path[1]))
+                respond(405, "Illegal directory name: You cannot include: #<>%$\+\-!`&*'|{}?/:\\\s@\"=]+");
+            else
+                fs.mkdir(path[1], respondErrorOrNothing(respond));
+        }
+        else if (error)
+            respond(500, error.toString());
+        else if(stats.isDirectory())
+            respond(405, "Directory already exists\n");
+        else
+            respond(500, "No idea. Contact programmer");
+    });
 };

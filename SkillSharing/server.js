@@ -30,7 +30,7 @@ function sendTalks(talks, response){
     });
 }
 
-router.add("GET", /^\/talks\/([^\/]+)$/, function(request, response){
+router.add("GET", /^\/talks$/, function(request, response){
     var query = require("url").parse(request.url, true).query;
     if(query.changesSince == null){
         var list = [];

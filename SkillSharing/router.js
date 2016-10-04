@@ -1,8 +1,8 @@
-function Router(method, url, handler){
+function Router(){
     this.routes = [];
 }
 
-Router.prototype.add = function(request, response){
+Router.prototype.add = function(method, url, handler){
     this.routes.push({
         method: method,
         url: url,

@@ -20,14 +20,84 @@ function respondJSON(response, status, data){
     respond(response, status, JSON.stringify(data), "application/json");
 }
 
+function readStreamAsJSON(stream, callback){
+    var data = "";
+    stream.on("data", function(chunk){
+        data += chunk;
+    });
+    stream.on("end", function(){
+        var result;
+        var error;
+        
+        try {result = JSON.parse(data);}
+        catch(e){error = e;}
+
+        callback(error, result);
+    });
+
+    stream.on("error", function(error){
+        callback(error);
+    });
+}
+
 var talks = Object.create(null);
-
-
 function sendTalks(talks, response){
     respondJSON(response, 200, {
         serverTime: Date.now(),
         talks: talks
     });
+}
+
+var waiting = [];
+function waitForChanges(since, response){
+    var waiter = {since: since, response: response};
+    waiting.push(waiter);
+
+    setTimeout(function() {
+        var found = waiting.indexOf(waiter);
+        if(found > -1){
+            waiting.splice(found, 1);
+            sendTalks([], response);
+        }
+    }, 90 * 1000);
+}
+
+// registerChange is called whenever a PUT, DELETE or POST(comments) action is performed.
+// It checks the array of waiting clients and pushs the changes to them by calling sendTalks
+// with the most recent changed data i.e. through getChangedTalks
+var changes = [];
+function registerChange(title){
+    changes.push({title:title, time: Date.now()});
+    waiting.forEach(function(waiter){
+        sendTalks(getChangedTalks(waiter.since), waiter.response);
+    });
+    waiting = [];
+}
+
+function getChangedTalks(since){
+    var found = [];
+    function alreadySeen(title){return found.some(function(f) { return f.title == title;});}
+
+    // Moving from the back to the front...
+    for (var i = changes.length - 1; i >= 0; i--){
+        var change = changes[i];
+
+        // Break when we reach the most recent change which was already sent to the client
+        if(change.time <= since)
+            break;
+        // If in our traversal, we've already dealt with the more recent changes to a
+        // certain talk, we can ignore it and continue
+        else if(alreadySeen(change.title))
+            continue;
+        // If the talk was changed, push the new version of the talk into found
+        else if(change.title in talks)
+            found.push(talks[change.title]);
+        // If the talk was deleted, send a signal to the client to remove it from the DOM
+        else
+            found.push({title: change.title, deleted: true});
+    }
+    //Return the array to the sendTalks function called in registerChange
+    return found;
 }
 
 router.add("GET", /^\/talks$/, function(request, response){
@@ -51,48 +121,6 @@ router.add("GET", /^\/talks$/, function(request, response){
     }
 });
 
-var waiting = [];
-function waitForChanges(since, response){
-    var waiter = {since: since, response: response};
-    waiting.push(waiter);
-
-    setTimeout(function() {
-        var found = waiting.indexOf(waiter);
-        if(found > -1){
-            waiting.splice(found, 1);
-            sendTalks([], response);
-        }
-    }, 90 * 1000);
-}
-
-
-var changes = [];
-function registerChange(title){
-    changes.push({title:title, time: Date.now()});
-    waiting.forEach(function(waiter){
-        sendTalks(getChangedTalks(waiter.since), waiter.response);
-    });
-    waiting = [];
-}
-
-function getChangedTalks(since){
-    var found = [];
-    function alreadySeen(title){return found.some(function(f) { return f.title == title;});}
-
-    for (var i = changes.length - 1; i >= 0; i--){
-        var change = changes[i];
-        if(change.time <= since)
-            break;
-        else if(alreadySeen(change.title))
-            continue;
-        else if(change.title in talks)
-            found.push(talks[change.title]);
-        else
-            found.push({title: change.title, deleted: true});
-    }
-    return found;
-}
-
 router.add("GET", /^\/talks\/([^\/]+)$/, function(request, response, title){
     if(title in talks)
         respondJSON(response, 200, talks[title]);
@@ -108,25 +136,7 @@ router.add("DELETE", /^\/talks\/([^\/]+)$/, function(request, response, title){
     respondJSON(response, 204, null);
 });
 
-function readStreamAsJSON(stream, callback){
-    var data = "";
-    stream.on("data", function(chunk){
-        data += chunk;
-    });
-    stream.on("end", function(){
-        var result;
-        var error;
-        
-        try {result = JSON.parse(data);}
-        catch(e){error = e;}
 
-        callback(error, result);
-    });
-
-    stream.on("error", function(error){
-        callback(error);
-    });
-}
 
 router.add("PUT", /^\/talks\/([^\/]+)$/, function(request, response, title){
     readStreamAsJSON(request, function(error, talk){

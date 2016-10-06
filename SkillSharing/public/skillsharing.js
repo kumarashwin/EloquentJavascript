@@ -115,6 +115,7 @@ function deleteTalk(title){
 
 function addComment(title, comment){
     var comment = {author: nameField.value, message: comment};
+    localStorage.removeItem("comment");
 
     request({
         pathname: talkURL(title) + "/comments",
@@ -128,6 +129,14 @@ var nameField = document.querySelector("#name");
 nameField.value = localStorage.getItem("name") || "";
 nameField.addEventListener("change", function(){
     localStorage.setItem("name", nameField.value);
+});
+
+
+//For the comments to stay stored in case of refresh
+talkDiv.addEventListener("input", function(event){
+    if(event.target.name == "comment"){
+        localStorage.setItem("comment", event.target.value);
+    }
 });
 
 var talkForm = document.querySelector("#newtalk");
@@ -157,6 +166,14 @@ function waitForChanges(){
                 } else {
                     response = JSON.parse(response);
                     displayTalks(response.talks);
+
+                    var commentField = document.querySelector("input[name=comment]");
+                    var comment = localStorage.getItem("comment");
+                    if(comment){
+                        commentField.value = comment;
+                        commentField.focus();
+                    }
+                    
                     lastServerTime = response.serverTime;
                     waitForChanges();
                 }
@@ -172,6 +189,7 @@ request({pathname: "talks"}, function(error, response){
     else{
         response = JSON.parse(response);
         displayTalks(response.talks);
+        localStorage.removeItem("comment");
         lastServerTime = response.serverTime;
         waitForChanges();
     }

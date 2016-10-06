@@ -133,8 +133,6 @@ router.add("DELETE", /^\/talks\/([^\/]+)$/, function(request, response, title){
     respondJSON(response, 204, null);
 });
 
-
-
 router.add("PUT", /^\/talks\/([^\/]+)$/, function(request, response, title){
     readStreamAsJSON(request, function(error, talk){
         if(error){

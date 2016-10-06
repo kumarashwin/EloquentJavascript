@@ -1,15 +1,10 @@
 var http = require("http");
 var Router = require("./router");
 var ecstatic = require("ecstatic");
+var fs = require("fs");
 
 var fileServer = ecstatic({root: "./public"});
 var router = new Router();
-
-//If router.resolve returns false, serve the static files.
-http.createServer(function(request, response){
-    if(!router.resolve(request, response))
-        fileServer(request, response);
-}).listen(8000);
 
 function respond(response, status, data, type){
     response.writeHead(status, {"Content-Type": type || "text/plain"});
@@ -40,7 +35,6 @@ function readStreamAsJSON(stream, callback){
     });
 }
 
-var talks = Object.create(null);
 function sendTalks(talks, response){
     respondJSON(response, 200, {
         serverTime: Date.now(),
@@ -72,6 +66,9 @@ function registerChange(title){
         sendTalks(getChangedTalks(waiter.since), waiter.response);
     });
     waiting = [];
+
+    // Save changes to file
+    writeToFile(talks);
 }
 
 function getChangedTalks(since){
@@ -171,3 +168,36 @@ router.add("POST", /^\/talks\/([^\/]+)\/comments$/, function(request, response, 
         }
     });
 });
+
+function writeToFile(talks){
+    fs.writeFile("./data.json", JSON.stringify(talks), function(error){
+        if(error)
+            console.log("Failed to write file: ", error);
+    });
+}
+
+function readFromFile(){
+    var result = Object.create(null);
+    var json;
+
+    try {
+        json = JSON.parse(fs.readFileSync("./data.json", "utf8"));
+    }
+    catch(e){
+        json = {};
+    }
+    for(var title in json)
+        result[title] = json[title];
+    
+    return result;
+}
+
+// === MAIN ===
+// Load previously stored talks 
+var talks = readFromFile();
+
+//If router.resolve returns false, serve the static files.
+http.createServer(function(request, response){
+    if(!router.resolve(request, response))
+        fileServer(request, response);
+}).listen(8000);

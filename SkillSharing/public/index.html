@@ -19,17 +19,20 @@
             <div class="talk">
                 <h2>{{title}}</h2>
                 <div>by <span class="name">{{presenter}}</span></div>
-                <p>{{summary}}
-                <div class="comments"></div>
+                <p>{{summary}}</p>
+                <div class="comments"><div class="comment" template-repeat="comments">
+                        <span class="name">{{author}}</span>: {{message}}
+                    </div>
+                </div>
                 <form>
                     <input type="text" name="comment">
                     <button type="submit">Add comment</button>
                     <button type="button" class="del">Delete talk</button>
                 </form>
             </div>
-            <div class="comment">
+            <!--<div class="comment">
                 <span class="name">{{author}}</span>: {{message}}
-            </div>
+            </div>-->
         </div>
     </body>
     <script src="skillsharing.js"></script>

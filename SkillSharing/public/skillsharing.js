@@ -55,11 +55,16 @@ function displayTalks(talks){
 
 function instantiateTemplate(name, values){
     function instantiateText(text){
+        // In STRING.replace, the second parameter of the callback, i.e. the
+        // 'name' variable here is used to reflect the groups in the regular
+        // expression, similar to $0, $1...
+        // So here, it reflects the group (\w+) and therefore
+        // it would be the string value of {{whatever}}
         return text.replace(/\{\{(\w+)\}\}/g, function(_, name){
             return values[name];
         });
     }
-
+    
     function instantiate(node){
         
         switch(node.nodeType){
@@ -67,15 +72,26 @@ function instantiateTemplate(name, values){
             case document.TEXT_NODE:
                 return document.createTextNode(instantiateText(node.nodeValue));
 
-            // If the node is of type element, clones it, and then recursively
+            // If the node is of type Element, clones it, and then recursively
             // builds copies of the child elements and so forth, essentially
             // reconstructing the parent i.e. child node of #template     
             case document.ELEMENT_NODE:
-                var copy = node.cloneNode();
-                for(var i = 0; i < node.childNodes.length; i++)
-                    copy.appendChild(instantiate(node.childNodes[i]));
-                return copy;
-            
+                if(node.hasAttribute("template-repeat") && node.className != name){
+                    var collectionName = node.getAttribute("template-repeat");
+                    var copy = node.cloneNode();
+                    values[collectionName].forEach(function(comment){
+                        copy.appendChild(instantiateTemplate("comment", comment));
+                    });
+                    return copy;
+                } else {
+                    var copy = node.cloneNode();
+                    for(var i = 0; i < node.childNodes.length; i++)
+                        copy.appendChild(instantiate(node.childNodes[i]));
+                    // if (copy.childNodes[1] && copy.className && copy.childNodes[1].className == copy.className)
+                    //     return copy.childNodes[1];
+                    return copy;
+                }
+                
             // In the case that the node is neither a TEXT_NODE, nor an
             // ELEMENT_NODE. Comments or Attributes. 
             default:
@@ -83,17 +99,18 @@ function instantiateTemplate(name, values){
         }
     }
 
+    // What 'instantiateTemplate' actually does:
     var template = document.querySelector("#template ." + name);
     return instantiate(template);
 }
 
 function drawTalk(talk){
     var node = instantiateTemplate("talk", talk);
-    var comments = node.querySelector(".comments");
+    // var comments = node.querySelector(".comments");
 
-    talk.comments.forEach(function(comment){
-        comments.appendChild(instantiateTemplate("comment", comment));
-    });
+    // talk.comments.forEach(function(comment){
+    //     comments.appendChild(instantiateTemplate("comment", comment));
+    // });
 
     node.querySelector("button.del").addEventListener("click", deleteTalk.bind(null, talk.title));
 
